@@ -12,7 +12,11 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'Flutter Demo',
-      home: GameView(),
+      home: GameView(
+        sizeX: 6,
+        sizeY: 12,
+        mineCount: 10,
+      ),
     );
   }
 }
