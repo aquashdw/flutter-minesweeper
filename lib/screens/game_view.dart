@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:minesweeper/widgets/mine_board.dart';
 
 class GameView extends StatelessWidget {
   const GameView({super.key});
@@ -16,11 +17,19 @@ class GameView extends StatelessWidget {
           child: Center(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                return Container(
-                  padding: const EdgeInsets.all(400),
-                  color: Colors.red,
-                  width: constraints.maxWidth * 0.9,
-                  height: constraints.maxHeight * 0.9,
+                var candidateWidth = constraints.maxHeight * 0.9 / 12;
+                var candidateHeight = constraints.maxWidth * 0.9 / 6;
+                var targetSize = candidateHeight > candidateWidth
+                    ? candidateWidth
+                    : candidateHeight;
+                return SizedBox(
+                  width: targetSize * 6,
+                  height: targetSize * 12,
+                  child: MineBoard(
+                    panelSize: targetSize,
+                    countHorizontal: 6,
+                    countVertical: 12,
+                  ),
                 );
               },
             ),
