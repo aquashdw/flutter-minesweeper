@@ -15,7 +15,10 @@ class MineBloc extends Bloc<MineEvent, MineState> {
   // bloc holds its state
   MineBloc(MineState mineState) : super(mineState) {
     on<CellOpenEvent>((event, emit) {
-      print('${event.x}, ${event.y}');
+      // print('${event.x}, ${event.y}');
+      state.openState =
+          openCell(event.x, event.y, state.openState, state.mineBoard);
+      emit(MineState.fromState(state: state));
     });
   }
 }
@@ -24,7 +27,7 @@ enum GameStatus { playing, win, lose }
 
 class MineState {
   final List<List<int>> mineBoard;
-  final List<List<bool>> openState;
+  List<List<bool>> openState;
   final int sizeX;
   final int sizeY;
   GameStatus status;
@@ -36,6 +39,13 @@ class MineState {
     required this.sizeY,
     this.status = GameStatus.playing,
   });
+
+  MineState.fromState({required MineState state, GameStatus? status})
+      : mineBoard = state.mineBoard,
+        openState = state.openState,
+        sizeX = state.sizeX,
+        sizeY = state.sizeY,
+        status = status ?? state.status;
 }
 
 MineBloc newGame(int sizeX, int sizeY, int mineCount) {
@@ -56,18 +66,14 @@ bool checkBounds(int targetX, int targetY, int sizeX, int sizeY) {
   return !(targetX < 0 || targetX >= sizeX || targetY < 0 || targetY >= sizeY);
 }
 
-List<List<int>> generateBoard(horizontal, vertical, mineCount) {
-  var countHorizontal = 6;
-  var countVertical = 12;
-  var mineCount = 10;
+List<List<int>> generateBoard(sizeX, sizeY, mineCount) {
   var mineBoard = [
-    for (var i = 0; i < countVertical; i++)
-      [for (var j = 0; j < countHorizontal; j++) 0]
+    for (var i = 0; i < sizeY; i++) [for (var j = 0; j < sizeX; j++) 0]
   ];
   var mineGen = Random();
   var minePositions = [];
   while (minePositions.length < mineCount) {
-    var mineCandidate = mineGen.nextInt(countVertical * countHorizontal);
+    var mineCandidate = mineGen.nextInt(sizeX * sizeY);
     if (!minePositions.contains(mineCandidate)) {
       minePositions.add(mineCandidate);
     }
@@ -81,7 +87,7 @@ List<List<int>> generateBoard(horizontal, vertical, mineCount) {
       for (var dy = -1; dy < 2; dy++) {
         var checkX = mineX + dx;
         var checkY = mineY + dy;
-        if (!checkBounds(checkX, checkY, countHorizontal, countVertical)) {
+        if (!checkBounds(checkX, checkY, sizeX, sizeY)) {
           continue;
         }
         if (mineBoard[checkY][checkX] != 9) {
@@ -92,4 +98,48 @@ List<List<int>> generateBoard(horizontal, vertical, mineCount) {
   }
 
   return mineBoard;
+}
+
+List<List<bool>> openCell(int targetX, int targetY, List<List<bool>> openState,
+    List<List<int>> mineBoard) {
+  // is mine
+  if (mineBoard[targetY][targetX] == 9) {
+    openState[targetY][targetX] = true; // TODO lose
+  }
+  // mine in range
+  else if (mineBoard[targetY][targetX] > 0) {
+    openState[targetY][targetX] = true;
+  }
+  // mine not in range (open surrounding)
+  else {
+    var checkQueue = [Point(targetX, targetY)];
+    var sizeX = openState[0].length;
+    var sizeY = openState.length;
+    var visited = [
+      for (var i = 0; i < sizeY; i++) [for (var j = 0; j < sizeX; j++) false]
+    ];
+    while (checkQueue.isNotEmpty) {
+      var next = checkQueue.removeAt(0);
+
+      // open next cell
+      openState[next.y][next.x] = true;
+      // set true to visited
+      visited[next.y][next.x] = true;
+      // if current cell is blank,
+      if (mineBoard[next.y][next.x] == 0) {
+        // check cells around you
+        for (var dx = -1; dx < 2; dx++) {
+          for (var dy = -1; dy < 2; dy++) {
+            var checkX = next.x + dx;
+            var checkY = next.y + dy;
+            if (!checkBounds(checkX, checkY, sizeX, sizeY)) continue;
+            if (visited[checkY][checkX]) continue;
+            // add the cell to visit next
+            checkQueue.add(Point(checkX, checkY));
+          }
+        }
+      }
+    }
+  }
+  return openState;
 }
