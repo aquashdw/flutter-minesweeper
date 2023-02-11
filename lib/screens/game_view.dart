@@ -28,18 +28,22 @@ class GameView extends StatelessWidget {
           child: Center(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                var candidateWidth = constraints.maxHeight * 0.9 / sizeY;
-                var candidateHeight = constraints.maxWidth * 0.9 / sizeX;
-                var targetSize = candidateHeight > candidateWidth
-                    ? candidateWidth
-                    : candidateHeight;
+                var sizeFromWidth = constraints.maxHeight * 0.9 / sizeY;
+                var sizeFromHeight = constraints.maxWidth * 0.9 / sizeX;
+                var panelSize = sizeFromHeight > sizeFromWidth
+                    ? sizeFromWidth
+                    : sizeFromHeight;
+                var padddingSize = sizeFromHeight > sizeFromWidth 
+                    ? constraints.maxHeight * 0.1 
+                    : constraints.maxWidth * 0.1;
                 return SizedBox(
-                  width: targetSize * 6,
-                  height: targetSize * 12,
+                  width: panelSize * 6,
+                  height: panelSize * 12,
                   child: BlocProvider<MineBloc>(
                     create: (context) => newGame(sizeX, sizeY, mineCount),
                     child: MineBoard(
-                      panelSize: targetSize,
+                      padddingSize: padddingSize,
+                      panelSize: panelSize,
                       countHorizontal: 6,
                       countVertical: 12,
                     ),

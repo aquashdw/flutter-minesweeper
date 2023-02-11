@@ -3,12 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minesweeper/service/mine_bloc.dart';
 
 class MineBoard extends StatelessWidget {
+  final double padddingSize;
   final double panelSize;
   final int countHorizontal;
   final int countVertical;
 
   const MineBoard({
     super.key,
+    required this.padddingSize,
     required this.panelSize,
     required this.countHorizontal,
     required this.countVertical,
@@ -26,15 +28,23 @@ class MineBoard extends StatelessWidget {
                   for (var j = 0; j < countHorizontal; j++)
                     GestureDetector(
                       onTap: () {
-                        context.read<MineBloc>().add(CellOpenEvent(j, i));
+                        context.read<MineBloc>().add(TapCellEvent(j, i));
+                      },
+                      onDoubleTap: () {
+                        context.read<MineBloc>().add(OpenCellEvent(j, i));
                       },
                       child: state.openState[i][j]
                           ? Container(
                               width: panelSize,
                               height: panelSize,
-                              color: (i + j) % 2 == 0
-                                  ? Colors.amber[100]
-                                  : Colors.amber[200],
+                              decoration: BoxDecoration(
+                                color: (i + j) % 2 == 0
+                                    ? Colors.amber[100]
+                                    : Colors.amber[200],
+                                border: _setBorder(state.controlOpen &&
+                                    state.controlX == j &&
+                                    state.controlY == i),
+                              ),
                               child: Center(
                                 child: _fillChild(
                                   state.mineBoard[i][j],
@@ -44,9 +54,16 @@ class MineBoard extends StatelessWidget {
                           : Container(
                               width: panelSize,
                               height: panelSize,
-                              color: (i + j) % 2 == 0
-                                  ? Colors.blueGrey[100]
-                                  : Colors.blueGrey[200],
+                              decoration: BoxDecoration(
+                                color: (i + j) % 2 == 0
+                                    ? Colors.blueGrey[100]
+                                    : Colors.blueGrey[200],
+                                border: _setBorder(
+                                  state.controlOpen &&
+                                      state.controlX == j &&
+                                      state.controlY == i,
+                                ),
+                              ),
                             ),
                     ),
                 ],
@@ -106,5 +123,15 @@ class MineBoard extends StatelessWidget {
       default:
         return Colors.transparent;
     }
+  }
+
+  Border? _setBorder(bool show) {
+    if (show) {
+      return Border.all(
+        color: Colors.amber,
+        width: 2,
+      );
+    }
+    return null;
   }
 }

@@ -4,19 +4,27 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class MineEvent {}
 
-class CellOpenEvent extends MineEvent {
+class CellEvent extends MineEvent {
   final int x;
   final int y;
 
-  CellOpenEvent(this.x, this.y);
+  CellEvent(this.x, this.y);
+}
+
+class OpenCellEvent extends CellEvent {
+  OpenCellEvent(super.x, super.y);
+}
+
+class TapCellEvent extends CellEvent {
+  TapCellEvent(super.x, super.y);
 }
 
 class MineBloc extends Bloc<MineEvent, MineState> {
-  // bloc holds its state
   MineBloc(MineState mineState) : super(mineState) {
-    on<CellOpenEvent>((event, emit) {
-      // print('${event.x}, ${event.y}');
-
+    on<TapCellEvent>((event, emit) {
+      emit(state.openControl(event.x, event.y));
+    });
+    on<OpenCellEvent>((event, emit) {
       var openState =
           openCell(event.x, event.y, state.openState, state.mineBoard);
       emit(state.newOpenState(openState));
@@ -31,6 +39,9 @@ class MineState {
   final List<List<bool>> openState;
   final int sizeX;
   final int sizeY;
+  final bool controlOpen;
+  final int controlX;
+  final int controlY;
   GameStatus status;
 
   MineState({
@@ -38,6 +49,9 @@ class MineState {
     required this.openState,
     required this.sizeX,
     required this.sizeY,
+    this.controlOpen = false,
+    this.controlX = 0,
+    this.controlY = 0,
     this.status = GameStatus.playing,
   });
 
@@ -47,6 +61,29 @@ class MineState {
       openState: openState,
       sizeX: sizeX,
       sizeY: sizeY,
+      controlOpen: false,
+    );
+  }
+
+  MineState openControl(int x, int y) {
+    return MineState(
+      mineBoard: mineBoard,
+      openState: openState,
+      sizeX: sizeX,
+      sizeY: sizeY,
+      controlOpen: true,
+      controlX: x,
+      controlY: y,
+    );
+  }
+
+  MineState closeControl() {
+    return MineState(
+      mineBoard: mineBoard,
+      openState: openState,
+      sizeX: sizeX,
+      sizeY: sizeY,
+      controlOpen: false,
     );
   }
 }
