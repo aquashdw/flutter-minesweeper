@@ -16,9 +16,10 @@ class MineBloc extends Bloc<MineEvent, MineState> {
   MineBloc(MineState mineState) : super(mineState) {
     on<CellOpenEvent>((event, emit) {
       // print('${event.x}, ${event.y}');
-      state.openState =
+
+      var openState =
           openCell(event.x, event.y, state.openState, state.mineBoard);
-      emit(MineState.fromState(state: state));
+      emit(state.newOpenState(openState));
     });
   }
 }
@@ -27,7 +28,7 @@ enum GameStatus { playing, win, lose }
 
 class MineState {
   final List<List<int>> mineBoard;
-  List<List<bool>> openState;
+  final List<List<bool>> openState;
   final int sizeX;
   final int sizeY;
   GameStatus status;
@@ -40,12 +41,14 @@ class MineState {
     this.status = GameStatus.playing,
   });
 
-  MineState.fromState({required MineState state, GameStatus? status})
-      : mineBoard = state.mineBoard,
-        openState = state.openState,
-        sizeX = state.sizeX,
-        sizeY = state.sizeY,
-        status = status ?? state.status;
+  MineState newOpenState(List<List<bool>> openState) {
+    return MineState(
+      mineBoard: mineBoard,
+      openState: openState,
+      sizeX: sizeX,
+      sizeY: sizeY,
+    );
+  }
 }
 
 MineBloc newGame(int sizeX, int sizeY, int mineCount) {

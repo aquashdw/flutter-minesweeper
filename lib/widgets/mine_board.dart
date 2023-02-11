@@ -28,18 +28,26 @@ class MineBoard extends StatelessWidget {
                       onTap: () {
                         context.read<MineBloc>().add(CellOpenEvent(j, i));
                       },
-                      child: Container(
-                        width: panelSize,
-                        height: panelSize,
-                        // color: (i + j) % 2 == 0
-                        //     ? Colors.blueGrey[100]
-                        //     : Colors.blueGrey[200],
-                        color: state.openState[i][j]
-                            ? Colors.amber
-                            : (i + j) % 2 == 0
-                                ? Colors.blueGrey[100]
-                                : Colors.blueGrey[200],
-                      ),
+                      child: state.openState[i][j]
+                          ? Container(
+                              width: panelSize,
+                              height: panelSize,
+                              color: (i + j) % 2 == 0
+                                  ? Colors.amber[100]
+                                  : Colors.amber[200],
+                              child: Center(
+                                child: _fillChild(
+                                  state.mineBoard[i][j],
+                                ),
+                              ),
+                            )
+                          : Container(
+                              width: panelSize,
+                              height: panelSize,
+                              color: (i + j) % 2 == 0
+                                  ? Colors.blueGrey[100]
+                                  : Colors.blueGrey[200],
+                            ),
                     ),
                 ],
               ),
@@ -47,5 +55,56 @@ class MineBoard extends StatelessWidget {
         );
       },
     );
+  }
+
+  Widget? _fillChild(int state) {
+    if (state == 9) {
+      return Text(
+        "X",
+        style: TextStyle(
+          fontSize: (panelSize ~/ 3 * 2).toDouble(),
+          fontWeight: FontWeight.bold,
+          color: Colors.red[900],
+        ),
+      );
+      // return Icon(
+      //   Icons.error_outline_sharp,
+      //   size: (panelSize ~/ 3 * 2).toDouble(),
+      // );
+    }
+    if (0 < state && state < 9) {
+      return Text(
+        "$state",
+        style: TextStyle(
+          fontSize: (panelSize ~/ 3 * 2).toDouble(),
+          fontWeight: FontWeight.bold,
+          color: _panelTextColor(state),
+        ),
+      );
+    }
+    return null;
+  }
+
+  Color _panelTextColor(int state) {
+    switch (state) {
+      case 1:
+        return Colors.blue;
+      case 2:
+        return Colors.green;
+      case 3:
+        return Colors.red;
+      case 4:
+        return Colors.purple;
+      case 5:
+        return const Color(0xFF800000);
+      case 6:
+        return Colors.teal;
+      case 7:
+        return Colors.black;
+      case 8:
+        return Colors.grey;
+      default:
+        return Colors.transparent;
+    }
   }
 }
