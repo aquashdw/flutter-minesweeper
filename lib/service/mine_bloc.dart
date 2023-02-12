@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:math';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +10,8 @@ class CellEvent extends MineEvent {
 
   CellEvent(this.x, this.y);
 }
+
+class CloseControlEvent extends MineEvent {}
 
 class OpenCellEvent extends CellEvent {
   OpenCellEvent(super.x, super.y);
@@ -26,12 +27,12 @@ class MineBloc extends Bloc<MineEvent, MineState> {
       emit(state.openControl(event.x, event.y));
     });
     on<OpenCellEvent>((event, emit) {
-      var start = Timeline.now;
-
       var openState =
           openCell(event.x, event.y, state.openState, state.mineBoard);
-      print("elapsed: ${Timeline.now - start}");
       emit(state.newOpenState(openState));
+    });
+    on<CloseControlEvent>((event, emit) {
+      emit(state.closeControl());
     });
   }
 }

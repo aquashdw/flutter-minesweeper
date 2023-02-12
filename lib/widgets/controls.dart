@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:minesweeper/service/mine_bloc.dart';
 
 enum CellPosition { topStart, topEnd, botStart, botEnd }
 
 class Controls extends StatelessWidget {
   final CellPosition position;
+  final int controlX;
+  final int controlY;
   final double cellSize;
 
   const Controls({
     super.key,
     required this.position,
     required this.cellSize,
+    required this.controlX,
+    required this.controlY,
   });
 
   @override
@@ -26,6 +32,7 @@ class Controls extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
+                // TODO flag
                 print("tapped blue control");
               },
               child: Container(
@@ -43,14 +50,20 @@ class Controls extends StatelessWidget {
           children: [
             GestureDetector(
               onTap: () {
-                print("tapped red control");
+                context.read<MineBloc>().add(OpenCellEvent(controlX, controlY));
               },
               child: Container(
                 width: 65,
                 height: 65,
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
+                  border: Border.all(width: 4, color: Colors.blue),
                   borderRadius: BorderRadius.circular(32.5),
-                  color: Colors.red,
+                  color: Colors.lightBlueAccent,
+                ),
+                child: Image.asset(
+                  "assets/flaticon-shovel.png",
+                  color: Colors.blue[900],
                 ),
               ),
             ),
@@ -59,15 +72,26 @@ class Controls extends StatelessWidget {
               height: 65,
               child: GestureDetector(
                 onTap: () {
-                  print("tapped green control");
+                  context.read<MineBloc>().add(CloseControlEvent());
                 },
                 child: Center(
                   child: Container(
                     width: 50,
                     height: 50,
                     decoration: BoxDecoration(
+                      border: Border.all(width: 4, color: Colors.blue),
                       borderRadius: BorderRadius.circular(25),
-                      color: Colors.green,
+                      color: Colors.lightBlueAccent,
+                    ),
+                    child: const Center(
+                      child: Text(
+                        "X",
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -77,63 +101,5 @@ class Controls extends StatelessWidget {
         ),
       ],
     );
-
-    // Stack(
-    //   clipBehavior: Clip.none,
-    //   children: [
-    //     Transform.translate(
-    //       offset: Offset(65, -sizeOver),
-    //       // left: 65,
-    //       // top: -sizeOver,
-    // child: GestureDetector(
-    //   onTap: () {
-    //     print("tapped blue control");
-    //   },
-    //   child: Container(
-    //     width: 65,
-    //     height: 65,
-    //     decoration: BoxDecoration(
-    //       borderRadius: BorderRadius.circular(32.5),
-    //       color: Colors.blue,
-    //     ),
-    //   ),
-    // ),
-    //     ),
-    //     Transform.translate(
-    //       offset: Offset(-sizeOver, 65),
-    // child: GestureDetector(
-    //   behavior: HitTestBehavior.opaque,
-    //   onTap: () {
-    //     print("tapped red control");
-    //   },
-    //   child: Container(
-    //     width: 65,
-    //     height: 65,
-    //     decoration: BoxDecoration(
-    //       borderRadius: BorderRadius.circular(32.5),
-    //       color: Colors.red,
-    //     ),
-    //   ),
-    // ),
-    // ),
-    // Transform.translate(
-    //   offset: const Offset(70, 70),
-    //   child: GestureDetector(
-    //     behavior: HitTestBehavior.translucent,
-    //     onTap: () {
-    //       print("tapped green control");
-    //     },
-    //     child: Container(
-    //       width: 50,
-    //       height: 50,
-    //       decoration: BoxDecoration(
-    //         borderRadius: BorderRadius.circular(22.5),
-    //         color: Colors.green,
-    //       ),
-    //     ),
-    //   ),
-    // ),
-    //   ],
-    // );
   }
 }

@@ -25,8 +25,8 @@ class MineBoard extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             SizedBox(
-              width: cellSize * countHorizontal + 20,
-              height: cellSize * countVertical + 20,
+              width: cellSize * countHorizontal + (65 - cellSize),
+              height: cellSize * countVertical + (65 - cellSize),
               child: Center(
                 child: SizedBox(
                   width: cellSize * countHorizontal,
@@ -39,9 +39,11 @@ class MineBoard extends StatelessWidget {
                             for (var j = 0; j < countHorizontal; j++)
                               GestureDetector(
                                 onTap: () {
-                                  context
-                                      .read<MineBloc>()
-                                      .add(TapCellEvent(j, i));
+                                  if (!state.openState[i][j]) {
+                                    context
+                                        .read<MineBloc>()
+                                        .add(TapCellEvent(j, i));
+                                  }
                                 },
                                 onDoubleTap: () {
                                   context
@@ -90,14 +92,18 @@ class MineBoard extends StatelessWidget {
                 ),
               ),
             ),
-            Positioned(
-              top: state.controlY * cellSize,
-              left: state.controlX * cellSize,
-              child: Controls(
-                position: CellPosition.topStart,
-                cellSize: cellSize,
-              ),
-            )
+            state.controlOpen
+                ? Positioned(
+                    top: state.controlY * cellSize,
+                    left: state.controlX * cellSize,
+                    child: Controls(
+                      position: CellPosition.topStart,
+                      controlX: state.controlX,
+                      controlY: state.controlY,
+                      cellSize: cellSize,
+                    ),
+                  )
+                : const SizedBox(),
           ],
         );
       },
@@ -114,10 +120,6 @@ class MineBoard extends StatelessWidget {
           color: Colors.red[900],
         ),
       );
-      // return Icon(
-      //   Icons.error_outline_sharp,
-      //   size: (panelSize ~/ 3 * 2).toDouble(),
-      // );
     }
     if (0 < state && state < 9) {
       return Text(
