@@ -120,8 +120,8 @@ List<List<int>> generateBoard(sizeX, sizeY, mineCount) {
   }
 
   for (var minePosition in minePositions) {
-    var mineX = minePosition % 6;
-    var mineY = minePosition ~/ 6;
+    var mineX = minePosition % sizeX;
+    var mineY = minePosition ~/ sizeX;
     mineBoard[mineY][mineX] = 9;
     for (var dx = -1; dx < 2; dx++) {
       for (var dy = -1; dy < 2; dy++) {
