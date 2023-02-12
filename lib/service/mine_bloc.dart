@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:math';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,8 +26,11 @@ class MineBloc extends Bloc<MineEvent, MineState> {
       emit(state.openControl(event.x, event.y));
     });
     on<OpenCellEvent>((event, emit) {
+      var start = Timeline.now;
+
       var openState =
           openCell(event.x, event.y, state.openState, state.mineBoard);
+      print("elapsed: ${Timeline.now - start}");
       emit(state.newOpenState(openState));
     });
   }
@@ -175,7 +179,9 @@ List<List<bool>> openCell(int targetX, int targetY, List<List<bool>> openState,
             if (!checkBounds(checkX, checkY, sizeX, sizeY)) continue;
             if (visited[checkY][checkX]) continue;
             // add the cell to visit next
-            checkQueue.add(Point(checkX, checkY));
+            if (!checkQueue.contains(Point(checkX, checkY))) {
+              checkQueue.add(Point(checkX, checkY));
+            }
           }
         }
       }
