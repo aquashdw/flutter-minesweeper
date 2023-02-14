@@ -10,9 +10,8 @@ class MineBoard extends StatelessWidget {
   final double cellSize;
   final int countHorizontal;
   final int countVertical;
-  int tapBefore = Timeline.now;
 
-  MineBoard({
+  const MineBoard({
     super.key,
     required this.padddingSize,
     required this.cellSize,
@@ -24,6 +23,8 @@ class MineBoard extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<MineBloc, MineState>(
       builder: (context, state) {
+        int tapBefore = Timeline.now;
+        
         return Stack(
           clipBehavior: Clip.none,
           children: [
