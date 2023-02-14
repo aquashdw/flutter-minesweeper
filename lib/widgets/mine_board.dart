@@ -67,7 +67,7 @@ class MineBoard extends StatelessWidget {
                                   state.cellState[i][j],
                                   state.mineBoard[i][j],
                                   Point(j, i),
-                                  state.controlOpen &&
+                                  state.controlStatus != ControlStatus.closed &&
                                       state.controlX == j &&
                                       state.controlY == i,
                                 ),
@@ -79,12 +79,13 @@ class MineBoard extends StatelessWidget {
                 ),
               ),
             ),
-            state.controlOpen
+            state.controlStatus != ControlStatus.closed
                 ? Positioned(
                     top: state.controlY * cellSize,
                     left: state.controlX * cellSize,
                     child: Controls(
-                      position: CellPosition.topStart,
+                      position: CellPosition.topLeft,
+                      controlStatus: state.controlStatus,
                       controlX: state.controlX,
                       controlY: state.controlY,
                       cellSize: cellSize,

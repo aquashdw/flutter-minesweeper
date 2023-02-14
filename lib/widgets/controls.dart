@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minesweeper/service/mine_bloc.dart';
 
-enum CellPosition { topStart, topEnd, botStart, botEnd }
+enum CellPosition { topLeft, topRight, botLeft, botRight }
 
 class Controls extends StatelessWidget {
   final CellPosition position;
+  final ControlStatus controlStatus;
   final int controlX;
   final int controlY;
   final double cellSize;
@@ -13,6 +14,7 @@ class Controls extends StatelessWidget {
   const Controls({
     super.key,
     required this.position,
+    required this.controlStatus,
     required this.cellSize,
     required this.controlX,
     required this.controlY,

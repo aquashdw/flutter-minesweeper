@@ -48,12 +48,14 @@ enum GameStatus { playing, win, lose }
 
 enum CellState { closed, number, blank, flag, mine }
 
+enum ControlStatus { closed, all, shovel, flag }
+
 class MineState {
   final List<List<int>> mineBoard;
   final List<List<CellState>> cellState;
   final int sizeX;
   final int sizeY;
-  final bool controlOpen;
+  final ControlStatus controlStatus;
   final int controlX;
   final int controlY;
   GameStatus status;
@@ -63,7 +65,7 @@ class MineState {
     required this.cellState,
     required this.sizeX,
     required this.sizeY,
-    this.controlOpen = false,
+    this.controlStatus = ControlStatus.closed,
     this.controlX = 0,
     this.controlY = 0,
     this.status = GameStatus.playing,
@@ -75,7 +77,7 @@ class MineState {
       cellState: cellState,
       sizeX: sizeX,
       sizeY: sizeY,
-      controlOpen: false,
+      controlStatus: ControlStatus.closed,
     );
   }
 
@@ -89,7 +91,7 @@ class MineState {
         cellState: cellState,
         sizeX: sizeX,
         sizeY: sizeY,
-        controlOpen: false,
+        controlStatus: ControlStatus.closed,
       );
     } else {
       return this;
@@ -97,12 +99,13 @@ class MineState {
   }
 
   MineState openControl(int x, int y) {
+    // TODO set control status relevant to cell clicked
     return MineState(
       mineBoard: mineBoard,
       cellState: cellState,
       sizeX: sizeX,
       sizeY: sizeY,
-      controlOpen: true,
+      controlStatus: ControlStatus.all,
       controlX: x,
       controlY: y,
     );
@@ -114,7 +117,7 @@ class MineState {
       cellState: cellState,
       sizeX: sizeX,
       sizeY: sizeY,
-      controlOpen: false,
+      controlStatus: ControlStatus.closed,
     );
   }
 }
