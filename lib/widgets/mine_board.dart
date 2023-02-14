@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,7 +25,7 @@ class MineBoard extends StatelessWidget {
     return BlocBuilder<MineBloc, MineState>(
       builder: (context, state) {
         int tapBefore = Timeline.now;
-        
+
         return Stack(
           clipBehavior: Clip.none,
           children: [
@@ -62,40 +63,14 @@ class MineBoard extends StatelessWidget {
                                   }
                                 },
                                 behavior: HitTestBehavior.translucent,
-                                child:
-                                    (state.cellState[i][j] != CellState.closed)
-                                        ? Container(
-                                            width: cellSize,
-                                            height: cellSize,
-                                            decoration: BoxDecoration(
-                                              color: (i + j) % 2 == 0
-                                                  ? Colors.amber[100]
-                                                  : Colors.amber[200],
-                                              border: _setBorder(
-                                                  state.controlOpen &&
-                                                      state.controlX == j &&
-                                                      state.controlY == i),
-                                            ),
-                                            child: Center(
-                                              child: _fillChild(
-                                                state.mineBoard[i][j],
-                                              ),
-                                            ),
-                                          )
-                                        : Container(
-                                            width: cellSize,
-                                            height: cellSize,
-                                            decoration: BoxDecoration(
-                                              color: (i + j) % 2 == 0
-                                                  ? Colors.blueGrey[100]
-                                                  : Colors.blueGrey[200],
-                                              border: _setBorder(
-                                                state.controlOpen &&
-                                                    state.controlX == j &&
-                                                    state.controlY == i,
-                                              ),
-                                            ),
-                                          ),
+                                child: _drawCell(
+                                  state.cellState[i][j],
+                                  state.mineBoard[i][j],
+                                  Point(j, i),
+                                  state.controlOpen &&
+                                      state.controlX == j &&
+                                      state.controlY == i,
+                                ),
                               ),
                           ],
                         ),
@@ -120,6 +95,56 @@ class MineBoard extends StatelessWidget {
         );
       },
     );
+  }
+
+  Widget? _drawCell(
+      CellState cellState, int cellValue, Point cell, bool controlOpen) {
+    if (cellState == CellState.closed) {
+      return Container(
+        width: cellSize,
+        height: cellSize,
+        decoration: BoxDecoration(
+          color: (cell.x + cell.y) % 2 == 0
+              ? Colors.blueGrey[100]
+              : Colors.blueGrey[200],
+          border: _setBorder(controlOpen),
+        ),
+      );
+    } else if (cellState == CellState.flag) {
+      return Container(
+        width: cellSize,
+        height: cellSize,
+        decoration: BoxDecoration(
+          color: (cell.x + cell.y) % 2 == 0
+              ? Colors.blueGrey[100]
+              : Colors.blueGrey[200],
+          border: _setBorder(controlOpen),
+        ),
+        child: Center(
+          child: Icon(
+            Icons.flag,
+            color: Colors.red,
+            size: (cellSize ~/ 3 * 2).toDouble(),
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        width: cellSize,
+        height: cellSize,
+        decoration: BoxDecoration(
+          color: (cell.x + cell.y) % 2 == 0
+              ? Colors.amber[100]
+              : Colors.amber[200],
+          border: _setBorder(controlOpen),
+        ),
+        child: Center(
+          child: _fillChild(
+            cellValue,
+          ),
+        ),
+      );
+    }
   }
 
   Widget? _fillChild(int state) {

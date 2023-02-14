@@ -32,15 +32,22 @@ class Controls extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
-                // TODO flag
-                print("tapped blue control");
+                context
+                    .read<MineBloc>()
+                    .add(ToggleFlagEvent(controlX, controlY));
               },
               child: Container(
                 width: 65,
                 height: 65,
                 decoration: BoxDecoration(
+                  border: Border.all(width: 4, color: Colors.blue),
                   borderRadius: BorderRadius.circular(32.5),
-                  color: Colors.blue,
+                  color: Colors.lightBlueAccent,
+                ),
+                child: Icon(
+                  Icons.flag,
+                  color: Colors.red,
+                  size: (cellSize ~/ 3 * 2).toDouble(),
                 ),
               ),
             ),

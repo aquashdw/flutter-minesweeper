@@ -13,6 +13,10 @@ class CellEvent extends MineEvent {
 
 class CloseControlEvent extends MineEvent {}
 
+class ToggleFlagEvent extends CellEvent {
+  ToggleFlagEvent(super.x, super.y);
+}
+
 class OpenCellEvent extends CellEvent {
   OpenCellEvent(super.x, super.y);
 }
@@ -25,6 +29,9 @@ class MineBloc extends Bloc<MineEvent, MineState> {
   MineBloc(MineState mineState) : super(mineState) {
     on<TapCellEvent>((event, emit) {
       emit(state.openControl(event.x, event.y));
+    });
+    on<ToggleFlagEvent>((event, emit) {
+      emit(state.flagCell(event.x, event.y));
     });
     on<OpenCellEvent>((event, emit) {
       var openState =
@@ -70,6 +77,23 @@ class MineState {
       sizeY: sizeY,
       controlOpen: false,
     );
+  }
+
+  MineState flagCell(int x, int y) {
+    var targetState = cellState[y][x];
+    if (targetState == CellState.closed || targetState == CellState.flag) {
+      cellState[y][x] =
+          targetState == CellState.closed ? CellState.flag : CellState.closed;
+      return MineState(
+        mineBoard: mineBoard,
+        cellState: cellState,
+        sizeX: sizeX,
+        sizeY: sizeY,
+        controlOpen: false,
+      );
+    } else {
+      return this;
+    }
   }
 
   MineState openControl(int x, int y) {
