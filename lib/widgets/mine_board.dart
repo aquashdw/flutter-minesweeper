@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minesweeper/service/mine_bloc.dart';
@@ -8,8 +10,9 @@ class MineBoard extends StatelessWidget {
   final double cellSize;
   final int countHorizontal;
   final int countVertical;
+  int tapBefore = Timeline.now;
 
-  const MineBoard({
+  MineBoard({
     super.key,
     required this.padddingSize,
     required this.cellSize,
@@ -39,51 +42,59 @@ class MineBoard extends StatelessWidget {
                             for (var j = 0; j < countHorizontal; j++)
                               GestureDetector(
                                 onTap: () {
-                                  if (!(state.cellState[i][j] == CellState.blank)) {
+                                  if (!(state.cellState[i][j] ==
+                                      CellState.blank)) {
+                                    if (Timeline.now - tapBefore < 300000) {
+                                      context
+                                          .read<MineBloc>()
+                                          .add(OpenCellEvent(j, i));
+                                    } else {
+                                      tapBefore = Timeline.now;
+                                      context
+                                          .read<MineBloc>()
+                                          .add(TapCellEvent(j, i));
+                                    }
+                                  } else {
                                     context
                                         .read<MineBloc>()
-                                        .add(TapCellEvent(j, i));
+                                        .add(CloseControlEvent());
                                   }
                                 },
-                                onDoubleTap: () {
-                                  context
-                                      .read<MineBloc>()
-                                      .add(OpenCellEvent(j, i));
-                                },
                                 behavior: HitTestBehavior.translucent,
-                                child: (state.cellState[i][j] != CellState.closed)
-                                    ? Container(
-                                        width: cellSize,
-                                        height: cellSize,
-                                        decoration: BoxDecoration(
-                                          color: (i + j) % 2 == 0
-                                              ? Colors.amber[100]
-                                              : Colors.amber[200],
-                                          border: _setBorder(
-                                              state.controlOpen &&
-                                                  state.controlX == j &&
-                                                  state.controlY == i),
-                                        ),
-                                        child: Center(
-                                          child: _fillChild(
-                                            state.mineBoard[i][j],
+                                child:
+                                    (state.cellState[i][j] != CellState.closed)
+                                        ? Container(
+                                            width: cellSize,
+                                            height: cellSize,
+                                            decoration: BoxDecoration(
+                                              color: (i + j) % 2 == 0
+                                                  ? Colors.amber[100]
+                                                  : Colors.amber[200],
+                                              border: _setBorder(
+                                                  state.controlOpen &&
+                                                      state.controlX == j &&
+                                                      state.controlY == i),
+                                            ),
+                                            child: Center(
+                                              child: _fillChild(
+                                                state.mineBoard[i][j],
+                                              ),
+                                            ),
+                                          )
+                                        : Container(
+                                            width: cellSize,
+                                            height: cellSize,
+                                            decoration: BoxDecoration(
+                                              color: (i + j) % 2 == 0
+                                                  ? Colors.blueGrey[100]
+                                                  : Colors.blueGrey[200],
+                                              border: _setBorder(
+                                                state.controlOpen &&
+                                                    state.controlX == j &&
+                                                    state.controlY == i,
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      )
-                                    : Container(
-                                        width: cellSize,
-                                        height: cellSize,
-                                        decoration: BoxDecoration(
-                                          color: (i + j) % 2 == 0
-                                              ? Colors.blueGrey[100]
-                                              : Colors.blueGrey[200],
-                                          border: _setBorder(
-                                            state.controlOpen &&
-                                                state.controlX == j &&
-                                                state.controlY == i,
-                                          ),
-                                        ),
-                                      ),
                               ),
                           ],
                         ),
