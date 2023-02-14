@@ -67,7 +67,20 @@ class Controls extends StatelessWidget {
           children: [
             GestureDetector(
               onTap: () {
-                context.read<MineBloc>().add(OpenCellEvent(controlX, controlY));
+                switch (controlStatus) {
+                  case ControlStatus.shovel:
+                    context
+                        .read<MineBloc>()
+                        .add(OpenCellMulitEvent(controlX, controlY));
+                    break;
+                  case ControlStatus.all:
+                    context
+                        .read<MineBloc>()
+                        .add(OpenCellEvent(controlX, controlY));
+                    break;
+                  default:
+                    break;
+                }
               },
               child: [
                 ControlStatus.shovel,

@@ -21,6 +21,10 @@ class OpenCellEvent extends CellEvent {
   OpenCellEvent(super.x, super.y);
 }
 
+class OpenCellMulitEvent extends CellEvent {
+  OpenCellMulitEvent(super.x, super.y);
+}
+
 class TapCellEvent extends CellEvent {
   TapCellEvent(super.x, super.y);
 }
@@ -33,10 +37,15 @@ class MineBloc extends Bloc<MineEvent, MineState> {
     on<ToggleFlagEvent>((event, emit) {
       emit(state.flagCell(event.x, event.y));
     });
+    on<OpenCellMulitEvent>((event, emit) {
+      var cellStateMap =
+          openCellMulti(event.x, event.y, state.cellStateMap, state.mineBoard);
+      emit(state.newOpenState(cellStateMap));
+    });
     on<OpenCellEvent>((event, emit) {
-      var openState =
-          openCell(event.x, event.y, state.cellState, state.mineBoard);
-      emit(state.newOpenState(openState));
+      var cellStateMap =
+          openCell(event.x, event.y, state.cellStateMap, state.mineBoard);
+      emit(state.newOpenState(cellStateMap));
     });
     on<CloseControlEvent>((event, emit) {
       emit(state.closeControl());
@@ -46,13 +55,13 @@ class MineBloc extends Bloc<MineEvent, MineState> {
 
 enum GameStatus { playing, win, lose }
 
-enum CellState { closed, number, blank, flag, mine }
+enum CellState { closed, number, blank, flag, mine, flagWrong }
 
 enum ControlStatus { none, all, shovel, flag }
 
 class MineState {
   final List<List<int>> mineBoard;
-  final List<List<CellState>> cellState;
+  final List<List<CellState>> cellStateMap;
   final int sizeX;
   final int sizeY;
   final ControlStatus controlStatus;
@@ -62,7 +71,7 @@ class MineState {
 
   MineState({
     required this.mineBoard,
-    required this.cellState,
+    required this.cellStateMap,
     required this.sizeX,
     required this.sizeY,
     this.controlStatus = ControlStatus.none,
@@ -71,10 +80,10 @@ class MineState {
     this.status = GameStatus.playing,
   });
 
-  MineState newOpenState(List<List<CellState>> cellState) {
+  MineState newOpenState(List<List<CellState>> cellStateMap) {
     return MineState(
       mineBoard: mineBoard,
-      cellState: cellState,
+      cellStateMap: cellStateMap,
       sizeX: sizeX,
       sizeY: sizeY,
       controlStatus: ControlStatus.none,
@@ -82,13 +91,13 @@ class MineState {
   }
 
   MineState flagCell(int x, int y) {
-    var targetState = cellState[y][x];
+    var targetState = cellStateMap[y][x];
     if (targetState == CellState.closed || targetState == CellState.flag) {
-      cellState[y][x] =
+      cellStateMap[y][x] =
           targetState == CellState.closed ? CellState.flag : CellState.closed;
       return MineState(
         mineBoard: mineBoard,
-        cellState: cellState,
+        cellStateMap: cellStateMap,
         sizeX: sizeX,
         sizeY: sizeY,
         controlStatus: ControlStatus.none,
@@ -101,7 +110,7 @@ class MineState {
   MineState openControl(int x, int y) {
     var controlStatus = ControlStatus.all;
 
-    switch (cellState[y][x]) {
+    switch (cellStateMap[y][x]) {
       case CellState.blank:
         controlStatus = ControlStatus.none;
         break;
@@ -111,16 +120,21 @@ class MineState {
       case CellState.flag:
         controlStatus = ControlStatus.flag;
         break;
-      // TODO open only when blank nearby
       case CellState.number:
         var flagCount = 0;
+        var blankCount = 0;
         for (var i = -1; i < 2; i++) {
           for (var j = -1; j < 2; j++) {
-            if (checkBounds(x + j, y + i, sizeX, sizeY) &&
-                cellState[y + j][x + i] == CellState.flag) flagCount += 1;
+            if (checkBounds(x + j, y + i, sizeX, sizeY)) {
+              if (cellStateMap[y + i][x + j] == CellState.flag) {
+                flagCount += 1;
+              } else if (cellStateMap[y + i][x + j] == CellState.closed) {
+                blankCount += 1;
+              }
+            }
           }
         }
-        controlStatus = flagCount == mineBoard[y][x]
+        controlStatus = flagCount == mineBoard[y][x] && blankCount > 0
             ? ControlStatus.shovel
             : ControlStatus.none;
         break;
@@ -131,7 +145,7 @@ class MineState {
 
     return MineState(
       mineBoard: mineBoard,
-      cellState: cellState,
+      cellStateMap: cellStateMap,
       sizeX: sizeX,
       sizeY: sizeY,
       controlStatus: controlStatus,
@@ -143,12 +157,118 @@ class MineState {
   MineState closeControl() {
     return MineState(
       mineBoard: mineBoard,
-      cellState: cellState,
+      cellStateMap: cellStateMap,
       sizeX: sizeX,
       sizeY: sizeY,
       controlStatus: ControlStatus.none,
     );
   }
+}
+
+List<List<CellState>> openCell(int targetX, int targetY,
+    List<List<CellState>> cellStateMap, List<List<int>> mineBoard) {
+  // is mine
+  if (mineBoard[targetY][targetX] == 9) {
+    // TODO lose
+    cellStateMap[targetY][targetX] = CellState.mine;
+  }
+  // mine in range
+  else if (mineBoard[targetY][targetX] > 0) {
+    cellStateMap[targetY][targetX] = CellState.number;
+  }
+  // mine not in range (open surrounding)
+  else {
+    var checkQueue = [Point(targetX, targetY)];
+    var sizeX = cellStateMap[0].length;
+    var sizeY = cellStateMap.length;
+    var visited = [
+      for (var i = 0; i < sizeY; i++) [for (var j = 0; j < sizeX; j++) false]
+    ];
+    while (checkQueue.isNotEmpty) {
+      var next = checkQueue.removeAt(0);
+      // if visited continue
+      if (visited[next.y][next.x]) continue;
+      var nextCell = mineBoard[next.y][next.x];
+      var nextCellState = (cell) {
+        if (cell == 0) {
+          return CellState.blank;
+        } else if (0 < cell && cell < 9) {
+          return CellState.number;
+        } else {
+          throw Error();
+        }
+      }(nextCell);
+      // open next cell
+      cellStateMap[next.y][next.x] = nextCellState;
+      // set true to visited
+      visited[next.y][next.x] = true;
+      // if current cell is blank,
+      if (mineBoard[next.y][next.x] == 0) {
+        // check cells around you
+        for (var dx = -1; dx < 2; dx++) {
+          for (var dy = -1; dy < 2; dy++) {
+            var checkX = next.x + dx;
+            var checkY = next.y + dy;
+            if (!checkBounds(checkX, checkY, sizeX, sizeY)) continue;
+            if (visited[checkY][checkX]) continue;
+            checkQueue.add(Point(checkX, checkY));
+          }
+        }
+      }
+    }
+  }
+  return cellStateMap;
+}
+
+List<List<CellState>> openCellMulti(int targetX, int targetY,
+    List<List<CellState>> cellStateMap, List<List<int>> mineBoard) {
+  var sizeX = cellStateMap[0].length;
+  var sizeY = cellStateMap.length;
+  // queue for cells to open if no mines
+  var checkQueue = <Point<int>>[];
+  // queue for mines if mines behind surrounding cells
+  var mines = <Point<int>>[];
+  // for all surrounding cells
+  for (var dx = -1; dx < 2; dx++) {
+    for (var dy = -1; dy < 2; dy++) {
+      var checkX = targetX + dx;
+      var checkY = targetY + dy;
+      // if in bounds
+      if (checkBounds(checkX, checkY, sizeX, sizeY)) {
+        // skip if flag
+        if (cellStateMap[checkY][checkX] == CellState.flag) {
+          continue;
+        } 
+        // record mine
+        else if (mineBoard[checkY][checkX] == 9) {
+          mines.add(Point(checkX, checkY));
+        } 
+        // record open
+        else if (cellStateMap[checkY][checkX] == CellState.closed) {
+          checkQueue.add(Point(checkX, checkY));
+        }
+      }
+    }
+  }
+
+  // if any mines...
+  if (mines.isNotEmpty) {
+    // TODO lose
+    for (var mine in mines) {
+      cellStateMap[mine.y][mine.x] = CellState.mine;
+    }
+  } 
+  // if no mines
+  else {
+    // open all surrounding closed cells
+    for (var check in checkQueue) {
+      // cell may open in the progress, continue already open
+      if (cellStateMap[check.y][check.x] != CellState.closed) continue;
+      cellStateMap = openCell(check.x, check.y, cellStateMap, mineBoard);
+    }
+  }
+  
+  return cellStateMap;
 }
 
 MineBloc newGame(int sizeX, int sizeY, int mineCount) {
@@ -159,7 +279,7 @@ MineBloc newGame(int sizeX, int sizeY, int mineCount) {
 
   var mineState = MineState(
     mineBoard: generateBoard(sizeX, sizeY, mineCount),
-    cellState: cellState,
+    cellStateMap: cellState,
     sizeX: sizeX,
     sizeY: sizeY,
   );
@@ -202,58 +322,4 @@ List<List<int>> generateBoard(sizeX, sizeY, mineCount) {
   }
 
   return mineBoard;
-}
-
-List<List<CellState>> openCell(int targetX, int targetY,
-    List<List<CellState>> cellState, List<List<int>> mineBoard) {
-  // is mine
-  if (mineBoard[targetY][targetX] == 9) {
-    cellState[targetY][targetX] = CellState.mine; // TODO lose
-  }
-  // mine in range
-  else if (mineBoard[targetY][targetX] > 0) {
-    cellState[targetY][targetX] = CellState.number;
-  }
-  // mine not in range (open surrounding)
-  else {
-    var checkQueue = [Point(targetX, targetY)];
-    var sizeX = cellState[0].length;
-    var sizeY = cellState.length;
-    var visited = [
-      for (var i = 0; i < sizeY; i++) [for (var j = 0; j < sizeX; j++) false]
-    ];
-    while (checkQueue.isNotEmpty) {
-      var next = checkQueue.removeAt(0);
-      // if visited continue
-      if (visited[next.y][next.x]) continue;
-      var nextCell = mineBoard[next.y][next.x];
-      var nextCellState = (cell) {
-        if (cell == 0) {
-          return CellState.blank;
-        } else if (0 < cell && cell < 9) {
-          return CellState.number;
-        } else {
-          throw Error();
-        }
-      }(nextCell);
-      // open next cell
-      cellState[next.y][next.x] = nextCellState;
-      // set true to visited
-      visited[next.y][next.x] = true;
-      // if current cell is blank,
-      if (mineBoard[next.y][next.x] == 0) {
-        // check cells around you
-        for (var dx = -1; dx < 2; dx++) {
-          for (var dy = -1; dy < 2; dy++) {
-            var checkX = next.x + dx;
-            var checkY = next.y + dy;
-            if (!checkBounds(checkX, checkY, sizeX, sizeY)) continue;
-            if (visited[checkY][checkX]) continue;
-            checkQueue.add(Point(checkX, checkY));
-          }
-        }
-      }
-    }
-  }
-  return cellState;
 }

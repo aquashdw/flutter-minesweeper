@@ -45,7 +45,24 @@ class MineBoard extends StatelessWidget {
                             for (var j = 0; j < countHorizontal; j++)
                               GestureDetector(
                                 onTap: () {
-                                  if (!(state.cellState[i][j] ==
+                                  // TODO
+                                  // switch (state.cellStateMap[i][j]) {
+                                  //   case CellState.closed:
+                                  //     context
+                                  //         .read<MineBloc>()
+                                  //         .add(OpenCellEvent(j, i));
+                                  //     break;
+                                  //   case CellState.number:
+                                  //     context
+                                  //         .read<MineBloc>()
+                                  //         .add(OpenCellMulitEvent(j, i));
+                                  //     break;
+                                  //   case CellState.blank:
+                                  //   default:
+                                  //     break;
+                                  // }
+
+                                  if (!(state.cellStateMap[i][j] ==
                                       CellState.blank)) {
                                     if (Timeline.now - tapBefore < 300000) {
                                       context
@@ -65,7 +82,7 @@ class MineBoard extends StatelessWidget {
                                 },
                                 behavior: HitTestBehavior.translucent,
                                 child: _drawCell(
-                                  state.cellState[i][j],
+                                  state.cellStateMap[i][j],
                                   state.mineBoard[i][j],
                                   Point(j, i),
                                   state.controlStatus != ControlStatus.none &&
