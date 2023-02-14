@@ -24,14 +24,15 @@ class MineBoard extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<MineBloc, MineState>(
       builder: (context, state) {
-        int tapBefore = Timeline.now;
+        var controlPadding = 65 - cellSize > 0 ? 65 - cellSize : 0;
+        var tapBefore = Timeline.now;
 
         return Stack(
           clipBehavior: Clip.none,
           children: [
             SizedBox(
-              width: cellSize * countHorizontal + (65 - cellSize),
-              height: cellSize * countVertical + (65 - cellSize),
+              width: cellSize * countHorizontal + controlPadding,
+              height: cellSize * countVertical + controlPadding,
               child: Center(
                 child: SizedBox(
                   width: cellSize * countHorizontal,
@@ -125,7 +126,7 @@ class MineBoard extends StatelessWidget {
           child: Icon(
             Icons.flag,
             color: Colors.red,
-            size: (cellSize ~/ 3 * 2).toDouble(),
+            size: cellSize * 0.80,
           ),
         ),
       );

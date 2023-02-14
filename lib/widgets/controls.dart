@@ -46,10 +46,10 @@ class Controls extends StatelessWidget {
                   borderRadius: BorderRadius.circular(32.5),
                   color: Colors.lightBlueAccent,
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.flag,
                   color: Colors.red,
-                  size: (cellSize ~/ 3 * 2).toDouble(),
+                  size: 50,
                 ),
               ),
             ),
