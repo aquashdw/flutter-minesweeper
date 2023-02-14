@@ -38,20 +38,28 @@ class Controls extends StatelessWidget {
                     .read<MineBloc>()
                     .add(ToggleFlagEvent(controlX, controlY));
               },
-              child: Container(
-                width: 65,
-                height: 65,
-                decoration: BoxDecoration(
-                  border: Border.all(width: 4, color: Colors.blue),
-                  borderRadius: BorderRadius.circular(32.5),
-                  color: Colors.lightBlueAccent,
-                ),
-                child: const Icon(
-                  Icons.flag,
-                  color: Colors.red,
-                  size: 50,
-                ),
-              ),
+              child: [
+                ControlStatus.flag,
+                ControlStatus.all,
+              ].contains(controlStatus)
+                  ? Container(
+                      width: 65,
+                      height: 65,
+                      decoration: BoxDecoration(
+                        border: Border.all(width: 4, color: Colors.blue),
+                        borderRadius: BorderRadius.circular(32.5),
+                        color: Colors.lightBlueAccent,
+                      ),
+                      child: const Icon(
+                        Icons.flag,
+                        color: Colors.red,
+                        size: 50,
+                      ),
+                    )
+                  : const SizedBox(
+                      width: 65,
+                      height: 65,
+                    ),
             ),
           ],
         ),
@@ -61,20 +69,28 @@ class Controls extends StatelessWidget {
               onTap: () {
                 context.read<MineBloc>().add(OpenCellEvent(controlX, controlY));
               },
-              child: Container(
-                width: 65,
-                height: 65,
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  border: Border.all(width: 4, color: Colors.blue),
-                  borderRadius: BorderRadius.circular(32.5),
-                  color: Colors.lightBlueAccent,
-                ),
-                child: Image.asset(
-                  "assets/flaticon-shovel.png",
-                  color: Colors.blue[900],
-                ),
-              ),
+              child: [
+                ControlStatus.shovel,
+                ControlStatus.all,
+              ].contains(controlStatus)
+                  ? Container(
+                      width: 65,
+                      height: 65,
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        border: Border.all(width: 4, color: Colors.blue),
+                        borderRadius: BorderRadius.circular(32.5),
+                        color: Colors.lightBlueAccent,
+                      ),
+                      child: Image.asset(
+                        "assets/flaticon-shovel.png",
+                        color: Colors.blue[900],
+                      ),
+                    )
+                  : const SizedBox(
+                      width: 65,
+                      height: 65,
+                    ),
             ),
             SizedBox(
               width: 65,

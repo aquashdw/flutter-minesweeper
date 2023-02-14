@@ -48,7 +48,7 @@ enum GameStatus { playing, win, lose }
 
 enum CellState { closed, number, blank, flag, mine }
 
-enum ControlStatus { closed, all, shovel, flag }
+enum ControlStatus { none, all, shovel, flag }
 
 class MineState {
   final List<List<int>> mineBoard;
@@ -65,7 +65,7 @@ class MineState {
     required this.cellState,
     required this.sizeX,
     required this.sizeY,
-    this.controlStatus = ControlStatus.closed,
+    this.controlStatus = ControlStatus.none,
     this.controlX = 0,
     this.controlY = 0,
     this.status = GameStatus.playing,
@@ -77,7 +77,7 @@ class MineState {
       cellState: cellState,
       sizeX: sizeX,
       sizeY: sizeY,
-      controlStatus: ControlStatus.closed,
+      controlStatus: ControlStatus.none,
     );
   }
 
@@ -91,7 +91,7 @@ class MineState {
         cellState: cellState,
         sizeX: sizeX,
         sizeY: sizeY,
-        controlStatus: ControlStatus.closed,
+        controlStatus: ControlStatus.none,
       );
     } else {
       return this;
@@ -99,13 +99,42 @@ class MineState {
   }
 
   MineState openControl(int x, int y) {
-    // TODO set control status relevant to cell clicked
+    var controlStatus = ControlStatus.all;
+
+    switch (cellState[y][x]) {
+      case CellState.blank:
+        controlStatus = ControlStatus.none;
+        break;
+      case CellState.closed:
+        controlStatus = ControlStatus.all;
+        break;
+      case CellState.flag:
+        controlStatus = ControlStatus.flag;
+        break;
+      // TODO open only when blank nearby
+      case CellState.number:
+        var flagCount = 0;
+        for (var i = -1; i < 2; i++) {
+          for (var j = -1; j < 2; j++) {
+            if (checkBounds(x + j, y + i, sizeX, sizeY) &&
+                cellState[y + j][x + i] == CellState.flag) flagCount += 1;
+          }
+        }
+        controlStatus = flagCount == mineBoard[y][x]
+            ? ControlStatus.shovel
+            : ControlStatus.none;
+        break;
+      default:
+        controlStatus = ControlStatus.all;
+        break;
+    }
+
     return MineState(
       mineBoard: mineBoard,
       cellState: cellState,
       sizeX: sizeX,
       sizeY: sizeY,
-      controlStatus: ControlStatus.all,
+      controlStatus: controlStatus,
       controlX: x,
       controlY: y,
     );
@@ -117,7 +146,7 @@ class MineState {
       cellState: cellState,
       sizeX: sizeX,
       sizeY: sizeY,
-      controlStatus: ControlStatus.closed,
+      controlStatus: ControlStatus.none,
     );
   }
 }
@@ -195,6 +224,8 @@ List<List<CellState>> openCell(int targetX, int targetY,
     ];
     while (checkQueue.isNotEmpty) {
       var next = checkQueue.removeAt(0);
+      // if visited continue
+      if (visited[next.y][next.x]) continue;
       var nextCell = mineBoard[next.y][next.x];
       var nextCellState = (cell) {
         if (cell == 0) {
@@ -218,10 +249,7 @@ List<List<CellState>> openCell(int targetX, int targetY,
             var checkY = next.y + dy;
             if (!checkBounds(checkX, checkY, sizeX, sizeY)) continue;
             if (visited[checkY][checkX]) continue;
-            // add the cell to visit next
-            if (!checkQueue.contains(Point(checkX, checkY))) {
-              checkQueue.add(Point(checkX, checkY));
-            }
+            checkQueue.add(Point(checkX, checkY));
           }
         }
       }
