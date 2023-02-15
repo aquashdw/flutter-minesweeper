@@ -24,8 +24,14 @@ class MineBoard extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<MineBloc, MineState>(
       builder: (context, state) {
-        var controlPadding = 65 - cellSize > 0 ? 65 - cellSize : 0;
+        var controlPadding = (65 - cellSize > 0 ? 65 - cellSize : 0).toDouble();
         var tapBefore = Timeline.now;
+        var controlPosition = _controlPosition(
+          state.controlX,
+          state.controlY,
+          countHorizontal,
+          countVertical,
+        );
 
         return Stack(
           clipBehavior: Clip.none,
@@ -45,23 +51,6 @@ class MineBoard extends StatelessWidget {
                             for (var j = 0; j < countHorizontal; j++)
                               GestureDetector(
                                 onTap: () {
-                                  // TODO
-                                  // switch (state.cellStateMap[i][j]) {
-                                  //   case CellState.closed:
-                                  //     context
-                                  //         .read<MineBloc>()
-                                  //         .add(OpenCellEvent(j, i));
-                                  //     break;
-                                  //   case CellState.number:
-                                  //     context
-                                  //         .read<MineBloc>()
-                                  //         .add(OpenCellMulitEvent(j, i));
-                                  //     break;
-                                  //   case CellState.blank:
-                                  //   default:
-                                  //     break;
-                                  // }
-
                                   if (!(state.cellStateMap[i][j] ==
                                       CellState.blank)) {
                                     if (Timeline.now - tapBefore < 300000) {
@@ -99,13 +88,17 @@ class MineBoard extends StatelessWidget {
             ),
             state.controlStatus != ControlStatus.none
                 ? Positioned(
-                    top: state.controlY * cellSize,
-                    left: state.controlX * cellSize,
+                    top: state.controlY * cellSize +
+                        _controlOffsetY(state.controlY, controlPosition,
+                            cellSize, controlPadding),
+                    left: state.controlX * cellSize +
+                        _controlOffsetX(state.controlX, controlPosition,
+                            cellSize, controlPadding),
                     child: Controls(
-                      position: CellPosition.topLeft,
+                      position: controlPosition,
                       controlStatus: state.controlStatus,
-                      controlX: state.controlX,
-                      controlY: state.controlY,
+                      positionX: state.controlX,
+                      positionY: state.controlY,
                       cellSize: cellSize,
                     ),
                   )
@@ -114,6 +107,30 @@ class MineBoard extends StatelessWidget {
         );
       },
     );
+  }
+
+  ControlPosition _controlPosition(int x, int y, int sizeX, int sizeY) {
+    if (x > sizeX ~/ 2 - 1 && y > sizeY ~/ 2 - 1) {
+      return ControlPosition.botRight;
+    } else if (x > sizeX ~/ 2 - 1) {
+      return ControlPosition.topRight;
+    } else if (y > sizeY ~/ 2 - 1) {
+      return ControlPosition.botLeft;
+    } else {
+      return ControlPosition.topLeft;
+    }
+  }
+
+  double _controlOffsetX(int controlX, ControlPosition controlPosition,
+      double cellSize, double controlPadding) {
+    const offsetOn = {ControlPosition.topRight, ControlPosition.botRight};
+    return offsetOn.contains(controlPosition) ? -cellSize - controlPadding : 0;
+  }
+
+  double _controlOffsetY(int controlY, ControlPosition controlPosition,
+      double cellSize, double controlPadding) {
+    const offsetOn = {ControlPosition.botLeft, ControlPosition.botRight};
+    return offsetOn.contains(controlPosition) ? -cellSize - controlPadding : 0;
   }
 
   Widget? _drawCell(
@@ -166,8 +183,8 @@ class MineBoard extends StatelessWidget {
     }
   }
 
-  Widget? _fillChild(int state) {
-    if (state == 9) {
+  Widget? _fillChild(int cellValue) {
+    if (cellValue == 9) {
       return Text(
         "X",
         style: TextStyle(
@@ -177,21 +194,21 @@ class MineBoard extends StatelessWidget {
         ),
       );
     }
-    if (0 < state && state < 9) {
+    if (0 < cellValue && cellValue < 9) {
       return Text(
-        "$state",
+        "$cellValue",
         style: TextStyle(
           fontSize: (cellSize ~/ 3 * 2).toDouble(),
           fontWeight: FontWeight.bold,
-          color: _panelTextColor(state),
+          color: _panelTextColor(cellValue),
         ),
       );
     }
     return null;
   }
 
-  Color _panelTextColor(int state) {
-    switch (state) {
+  Color _panelTextColor(int cellValue) {
+    switch (cellValue) {
       case 1:
         return Colors.blue;
       case 2:
