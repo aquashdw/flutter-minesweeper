@@ -60,6 +60,7 @@ enum ControlStatus { none, all, shovel, flag }
 class MineState {
   final List<List<int>> mineBoard;
   final List<List<CellState>> cellStateMap;
+  final int mineCount;
   final int sizeX;
   final int sizeY;
   final ControlStatus controlStatus;
@@ -70,6 +71,7 @@ class MineState {
   MineState({
     required this.mineBoard,
     required this.cellStateMap,
+    required this.mineCount,
     required this.sizeX,
     required this.sizeY,
     this.controlStatus = ControlStatus.none,
@@ -83,6 +85,7 @@ class MineState {
     return MineState(
       mineBoard: mineBoard,
       cellStateMap: cellStateMap,
+      mineCount: mineCount,
       sizeX: sizeX,
       sizeY: sizeY,
     );
@@ -96,6 +99,7 @@ class MineState {
       return MineState(
         mineBoard: mineBoard,
         cellStateMap: cellStateMap,
+        mineCount: mineCount,
         sizeX: sizeX,
         sizeY: sizeY,
         controlStatus: ControlStatus.none,
@@ -144,6 +148,7 @@ class MineState {
     return MineState(
       mineBoard: mineBoard,
       cellStateMap: cellStateMap,
+      mineCount: mineCount,
       sizeX: sizeX,
       sizeY: sizeY,
       controlStatus: controlStatus,
@@ -156,10 +161,21 @@ class MineState {
     return MineState(
       mineBoard: mineBoard,
       cellStateMap: cellStateMap,
+      mineCount: mineCount,
       sizeX: sizeX,
       sizeY: sizeY,
       controlStatus: ControlStatus.none,
     );
+  }
+
+  int mineLeft() {
+    var count = 0;
+    for (var row in cellStateMap) {
+      for (var cell in row) {
+        if (cell == CellState.flag) count += 1;
+      }
+    }
+    return mineCount - count;
   }
 
   bool checkBounds(int targetX, int targetY) =>
@@ -272,6 +288,7 @@ MineBloc newGame(int sizeX, int sizeY, int mineCount) {
   var mineState = MineState(
     mineBoard: generateBoard(sizeX, sizeY, mineCount),
     cellStateMap: cellState,
+    mineCount: mineCount,
     sizeX: sizeX,
     sizeY: sizeY,
   );
