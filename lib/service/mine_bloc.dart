@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:math';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,12 +39,10 @@ class MineBloc extends Bloc<MineEvent, MineState> {
       emit(state.flagCell(event.x, event.y));
     });
     on<OpenCellMulitEvent>((event, emit) {
-      state.openCellMulti(event.x, event.y);
-      emit(state.newState());
+      emit(state.openCellMulti(event.x, event.y));
     });
     on<OpenCellEvent>((event, emit) {
-      state.openCell(event.x, event.y);
-      emit(state.newState());
+      emit(state.openCell(event.x, event.y));
     });
     on<CloseControlEvent>((event, emit) {
       emit(state.closeControl());
@@ -66,6 +65,7 @@ class MineState {
   final ControlStatus controlStatus;
   final int controlX;
   final int controlY;
+  final int startTime;
   GameStatus status;
 
   MineState({
@@ -74,20 +74,30 @@ class MineState {
     required this.mineCount,
     required this.sizeX,
     required this.sizeY,
+    required this.startTime,
     this.controlStatus = ControlStatus.none,
     this.controlX = 0,
     this.controlY = 0,
     this.status = GameStatus.playing,
   });
 
-  // shallow copy state
-  MineState newState() {
+  MineState copyWith({
+    ControlStatus? controlStatus,
+    int? controlX,
+    int? controlY,
+    GameStatus? status,
+  }) {
     return MineState(
       mineBoard: mineBoard,
       cellStateMap: cellStateMap,
       mineCount: mineCount,
       sizeX: sizeX,
       sizeY: sizeY,
+      startTime: startTime,
+      controlStatus: controlStatus ?? this.controlStatus,
+      controlX: controlX ?? this.controlX,
+      controlY: controlY ?? this.controlY,
+      status: status ?? this.status,
     );
   }
 
@@ -96,12 +106,7 @@ class MineState {
     if (targetState == CellState.closed || targetState == CellState.flag) {
       cellStateMap[y][x] =
           targetState == CellState.closed ? CellState.flag : CellState.closed;
-      return MineState(
-        mineBoard: mineBoard,
-        cellStateMap: cellStateMap,
-        mineCount: mineCount,
-        sizeX: sizeX,
-        sizeY: sizeY,
+      return copyWith(
         controlStatus: ControlStatus.none,
       );
     } else {
@@ -145,12 +150,7 @@ class MineState {
         break;
     }
 
-    return MineState(
-      mineBoard: mineBoard,
-      cellStateMap: cellStateMap,
-      mineCount: mineCount,
-      sizeX: sizeX,
-      sizeY: sizeY,
+    return copyWith(
       controlStatus: controlStatus,
       controlX: x,
       controlY: y,
@@ -158,12 +158,7 @@ class MineState {
   }
 
   MineState closeControl() {
-    return MineState(
-      mineBoard: mineBoard,
-      cellStateMap: cellStateMap,
-      mineCount: mineCount,
-      sizeX: sizeX,
-      sizeY: sizeY,
+    return copyWith(
       controlStatus: ControlStatus.none,
     );
   }
@@ -181,7 +176,7 @@ class MineState {
   bool checkBounds(int targetX, int targetY) =>
       !(targetX < 0 || targetX >= sizeX || targetY < 0 || targetY >= sizeY);
 
-  void openCell(int targetX, int targetY) {
+  MineState openCell(int targetX, int targetY) {
     // is mine
     if (mineBoard[targetY][targetX] == 9) {
       // TODO lose
@@ -230,9 +225,11 @@ class MineState {
         }
       }
     }
+
+    return copyWith(controlStatus: ControlStatus.none);
   }
 
-  void openCellMulti(int targetX, int targetY) {
+  MineState openCellMulti(int targetX, int targetY) {
     // queue for cells to open if no mines
     var checkQueue = <Point<int>>[];
     // queue for mines if mines behind surrounding cells
@@ -276,6 +273,8 @@ class MineState {
         openCell(check.x, check.y);
       }
     }
+
+    return copyWith(controlStatus: ControlStatus.none);
   }
 }
 
@@ -291,6 +290,7 @@ MineBloc newGame(int sizeX, int sizeY, int mineCount) {
     mineCount: mineCount,
     sizeX: sizeX,
     sizeY: sizeY,
+    startTime: Timeline.now,
   );
   return MineBloc(mineState);
 }
