@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minesweeper/service/mine_bloc.dart';
@@ -53,7 +56,7 @@ class GameView extends StatelessWidget {
                     SizedBox(
                       width: 5,
                     ),
-                    Text("10"),
+                    _TimeDisplay(),
                   ],
                 ),
               ],
@@ -88,5 +91,38 @@ class GameView extends StatelessWidget {
         );
       }),
     );
+  }
+}
+
+class _TimeDisplay extends StatefulWidget {
+  const _TimeDisplay();
+
+  @override
+  State<_TimeDisplay> createState() => _TimeDisplayState();
+}
+
+class _TimeDisplayState extends State<_TimeDisplay> {
+  late final Timer timer;
+  int now = Timeline.now;
+
+  @override
+  void initState() {
+    timer = Timer.periodic(const Duration(milliseconds: 500), tick);
+    super.initState();
+  }
+
+  void tick(Timer timer) {
+    setState(() {
+      now = Timeline.now;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<MineBloc, MineState>(builder: (context, state) {
+      return Text(
+        "${Duration(microseconds: now - state.startTime).inSeconds}",
+      );
+    });
   }
 }
