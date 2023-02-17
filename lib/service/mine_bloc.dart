@@ -241,9 +241,12 @@ class MineState {
         var checkY = targetY + dy;
         // if in bounds
         if (checkBounds(checkX, checkY)) {
-          // skip if flag
+          // if flag
           if (cellStateMap[checkY][checkX] == CellState.flag) {
-            continue;
+            // if flag is wrong
+            if (mineBoard[checkY][checkX] != 9) {
+              cellStateMap[checkY][checkX] = CellState.flagWrong;
+            }
           }
           // record mine
           else if (mineBoard[checkY][checkX] == 9) {

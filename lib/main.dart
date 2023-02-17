@@ -15,7 +15,7 @@ class App extends StatelessWidget {
       home: GameView(
         sizeX: 8,
         sizeY: 16,
-        mineCount: 10,
+        mineCount: 12,
       ),
     );
   }

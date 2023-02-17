@@ -152,8 +152,8 @@ class MineBoard extends StatelessWidget {
         height: cellSize,
         decoration: BoxDecoration(
           color: (cell.x + cell.y) % 2 == 0
-              ? Colors.blueGrey[100]
-              : Colors.blueGrey[200],
+              ? Colors.greenAccent[100]
+              : Colors.greenAccent[200],
           border: _setBorder(controlOpen),
         ),
         child: Center(
@@ -161,6 +161,52 @@ class MineBoard extends StatelessWidget {
             Icons.flag,
             color: Colors.red,
             size: cellSize * 0.80,
+          ),
+        ),
+      );
+    } else if (cellState == CellState.flagWrong) {
+      return Container(
+        width: cellSize,
+        height: cellSize,
+        decoration: BoxDecoration(
+          color: (cell.x + cell.y) % 2 == 0
+              ? Colors.blueGrey[100]
+              : Colors.blueGrey[200],
+          border: _setBorder(controlOpen),
+        ),
+        child: Center(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Icon(
+                Icons.flag,
+                color: Colors.black,
+                size: cellSize * 0.80,
+              ),
+              Icon(
+                Icons.cancel_outlined,
+                color: Colors.red,
+                size: cellSize * 0.80,
+              ),
+            ],
+          ),
+        ),
+      );
+    } else if (cellState == CellState.mine) {
+      return Container(
+        width: cellSize,
+        height: cellSize,
+        decoration: BoxDecoration(
+          color: (cell.x + cell.y) % 2 == 0 ? Colors.red[600] : Colors.red[700],
+          border: _setBorder(controlOpen),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(3.0),
+            child: Image.asset(
+              "assets/icons8-mine.png",
+              color: Colors.black,
+            ),
           ),
         ),
       );
