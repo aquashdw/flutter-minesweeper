@@ -2,7 +2,7 @@
 
 Minesweeper with Flutter (practice project)
 
-Minesweeper is a puzzle game loved by many
+Minesweeper is a puzzle game loved by many, basic playing is similar to the game that can be played in the google search result [Minesweeper](https://www.google.com/search?q=minesweeper), so try searching `Minesweeper` in google with your smartphone
 
 ## TODO
 
