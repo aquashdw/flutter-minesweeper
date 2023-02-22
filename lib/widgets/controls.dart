@@ -8,8 +8,6 @@ enum ControlPosition { topLeft, topRight, botLeft, botRight }
 class Controls extends StatelessWidget {
   final ControlPosition position;
   final ControlStatus controlStatus;
-  final int positionX;
-  final int positionY;
   final double cellSize;
 
   static const reverseColOn = {
@@ -35,8 +33,6 @@ class Controls extends StatelessWidget {
     required this.position,
     required this.controlStatus,
     required this.cellSize,
-    required this.positionX,
-    required this.positionY,
   });
 
   @override

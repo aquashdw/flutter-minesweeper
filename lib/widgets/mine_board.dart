@@ -97,8 +97,6 @@ class MineBoard extends StatelessWidget {
                     child: Controls(
                       position: controlPosition,
                       controlStatus: state.controlStatus,
-                      positionX: state.controlX,
-                      positionY: state.controlY,
                       cellSize: cellSize,
                     ),
                   )
