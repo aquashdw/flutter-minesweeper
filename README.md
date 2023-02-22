@@ -8,7 +8,7 @@ Minesweeper is a puzzle game loved by many
 
 - lose
 - win
-- new game
+- new game with levels
 - pause
 
 ## Minesweeper Logic
@@ -417,4 +417,132 @@ if (cellState == CellState.closed) {
 
 at the top of the stack there are the controls...
 
-### Controls
+### Positioning the Controls
+
+whether the controls are actually drawn depends, so ternary operation is used
+
+```dart
+state.controlStatus != ControlStatus.none
+    ? Positioned(
+        top: state.controlY * cellSize +
+            _controlOffsetY(state.controlY, controlPosition,
+                cellSize, controlPadding),
+        left: state.controlX * cellSize +
+            _controlOffsetX(state.controlX, controlPosition,
+                cellSize, controlPadding),
+        child: Controls(
+          position: controlPosition,
+          controlStatus: state.controlStatus,
+          cellSize: cellSize,
+        ),
+      )
+    : const SizedBox(),
+```
+
+`Positioned` are used...because translated widgets' `GestureDetector` doesn't work....or I couldn't find how.
+
+because the control's display(positioning of buttons) differs based on the cell the controls are targeting, `controlPosition` argument is calculated in advance in the `builder` function, then passed to the `Controls` widget. theoretically it can be determined in the state (thus in the `Contorls`), but the board still has to calculate `Positioned`'s `top` and `left`, so its passed on to the controls
+
+### Controls - Positioning the buttons
+
+because `Transform` could not be used, `Column` with two `Row`s are used. it has to be reversed depending on the position, so the `children` of each `Column` and `Row` are calculated in methods, then reveresed based on `position`
+
+```dart
+...
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<MineBloc, MineState>(
+      builder: (context, state) {
+        return Column(
+          children: reverseColOn.contains(position)
+              ? columnChildren(context, state).reversed.toList()
+              : columnChildren(context, state),
+        );
+      },
+    );
+  }
+
+  List<Widget> columnChildren(BuildContext context, MineState state) {
+    return [
+      Row(
+        children: reverseRowOn.contains(position)
+            ? _topControls(context, state).reversed.toList()
+            : _topControls(context, state),
+      ),
+      Row(
+        children: reverseRowOn.contains(position)
+            ? _botControls(context, state).reversed.toList()
+            : _botControls(context, state),
+      ),
+    ];
+  }
+...
+```
+
+and which buttons are displayed...are complete jumble of gibberish
+
+```dart
+  static const reverseColOn = {
+    ControlPosition.botLeft,
+    ControlPosition.botRight,
+  };
+  static const reverseRowOn = {
+    ControlPosition.topRight,
+    ControlPosition.botRight,
+  };
+
+  static const showFlagOn = {
+    ControlStatus.all,
+    ControlStatus.flag,
+  };
+  static const showShovelOn = {
+    ControlStatus.all,
+    ControlStatus.shovel,
+  };
+...
+
+  List<Widget> _botControls(BuildContext context, MineState state) {
+    return [
+      GestureDetector(
+        onTap: () {
+          switch (controlStatus) {
+            case ControlStatus.shovel:
+              context
+                  .read<MineBloc>()
+                  .add(OpenCellMulitEvent(state.controlX, state.controlY));
+              break;
+            case ControlStatus.all:
+              context
+                  .read<MineBloc>()
+                  .add(OpenCellEvent(state.controlX, state.controlY));
+              break;
+            default:
+              break;
+          }
+        },
+        child: showShovelOn.contains(controlStatus)
+            ? Container(
+                width: 65,
+                height: 65,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  border: Border.all(width: 4, color: Colors.blue),
+                  borderRadius: BorderRadius.circular(32.5),
+                  color: Colors.lightBlueAccent,
+                ),
+                child: Image.asset(
+                  "assets/flaticon-shovel.png",
+                  color: Colors.blue[900],
+                ),
+              )
+            : const SizedBox(
+                width: 65,
+                height: 65,
+              ),
+      ),
+    ...
+
+```
+
+even more confusing, the shovel acts differently depending on whether the cell is `closed` or `number`
+
