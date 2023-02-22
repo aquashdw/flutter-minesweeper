@@ -127,6 +127,8 @@ then call `openCell` for all cells in queue...if there is no mines. if there is 
 
 now I have no idea how BLOC is used in real life, so just used my imaginations...
 
+### MineState
+
 a `State` is like the State of a stateful widget, so defined a `MineState` State object to hold the state of the game
 
 ```dart
@@ -172,6 +174,8 @@ class MineState {
 
 thought about making a enum for this as well...but it would mean enum containing `0 ~ 9` so just used int
 
+the `cellStateMap` is for actual display of the board, which cell is opened and which cell is flagged. which is required, as a puzzle game there is an answer to this puzzle, and the player's answer sheet in this game is the `cellStateMap`.
+
 since its a state for use in BLOC, also created a method for shallow copy (with change if needed)
 
 ```dart
@@ -197,3 +201,220 @@ since its a state for use in BLOC, also created a method for shallow copy (with 
   }
   ...
 ```
+
+### Events
+
+`MineBloc` reacts to `MineEvent`s
+
+```dart
+abstract class MineEvent {}
+
+...
+
+class MineBloc extends Bloc<MineEvent, MineState> {
+```
+
+some events (like opening cells) require which cell was hit, so the `MineEvent` class is extended to `CellEvent`
+
+```dart
+class CellEvent extends MineEvent {
+  final int x;
+  final int y;
+
+  CellEvent(this.x, this.y);
+}
+```
+
+actual event handling is done within the state methods
+
+```dart
+class MineBloc extends Bloc<MineEvent, MineState> {
+  MineBloc(MineState mineState) : super(mineState) {
+    on<TapCellEvent>((event, emit) {
+      emit(state.openControl(event.x, event.y));
+    });
+    on<ToggleFlagEvent>((event, emit) {
+      emit(state.flagCell(event.x, event.y));
+    });
+    on<OpenCellMulitEvent>((event, emit) {
+      emit(state.openCellMulti(event.x, event.y));
+    });
+    on<OpenCellEvent>((event, emit) {
+      emit(state.openCell(event.x, event.y));
+    });
+    on<CloseControlEvent>((event, emit) {
+      emit(state.closeControl());
+    });
+  }
+}
+
+...
+
+class MineState {
+  ...
+    MineState flagCell(int x, int y) {
+    var targetState = cellStateMap[y][x];
+    if (targetState == CellState.closed || targetState == CellState.flag) {
+      cellStateMap[y][x] =
+          targetState == CellState.closed ? CellState.flag : CellState.closed;
+      return copyWith(
+        controlStatus: ControlStatus.none,
+      );
+    } else {
+      return this;
+    }
+  }
+  ...
+}
+```
+
+hopefully the names will suffice for their functions
+
+## User Interface
+
+### GameView
+
+used a `LayoutBuilder` to draw the screen
+
+```dart
+body: Container(
+  color: Colors.lightBlue,
+  child: SafeArea(
+    child: Center(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          var sizeFromWidth = constraints.maxHeight * 0.9 / sizeY;
+          var sizeFromHeight = constraints.maxWidth * 0.9 / sizeX;
+          var panelSize = sizeFromHeight > sizeFromWidth
+              ? sizeFromWidth
+              : sizeFromHeight;
+          var padddingSize = sizeFromHeight > sizeFromWidth
+              ? constraints.maxHeight * 0.1
+              : constraints.maxWidth * 0.1;
+          return MineBoard(
+            padddingSize: padddingSize,
+            cellSize: panelSize,
+            countHorizontal: sizeX,
+            countVertical: sizeY,
+          );
+        },
+      ),
+    ),
+  ),
+),
+```
+
+for the cellSize(panelSize), divide each 90% of width and height of the constraint by count of horizontal cells and vertical cells, then use the one which is smaller. so the min padding will always be 10% of the constraint of the game screen.
+
+the actual padding size is delivered to the child `MineBoard`, which does the actual drawing, which is required...
+
+### MineBoard Widget
+
+to keep the `MineBoard` widget a stateless widget, any variables that may change depending on state was calculated in the `BlocBuilder`'s `builder` argument
+
+```dart
+@override
+Widget build(BuildContext context) {
+  return BlocBuilder<MineBloc, MineState>(
+    builder: (context, state) {
+      var controlPadding = (65 - cellSize > 0 ? 65 - cellSize : 0).toDouble();
+      var tapBefore = Timeline.now;
+      var controlPosition = _controlPosition(
+        state.controlX,
+        state.controlY,
+        countHorizontal,
+        countVertical,
+      );
+```
+
+start with `Stack` to draw both the board and the controls
+
+the board is actually a child of a `SizedBox` which is a little bigger than all the drawn cells
+
+```dart
+return Stack(
+  clipBehavior: Clip.none,
+  children: [
+    SizedBox(
+      width: cellSize * countHorizontal + controlPadding,
+      height: cellSize * countVertical + controlPadding,
+      ...
+```
+
+which was used because the controls can get off the board when the cell size is smaller than the control buttons, and once it get off the `Stack` the `GestureDetector` of the controls doesn't work
+
+the `tapBefore` var is also included, because defining both the `onDoubleTap` and `onTap` of the `GestureDetector` (of cells) results in heavy delays
+
+
+### Drawing the cells
+
+just draw the cells with double collection-for loops
+
+```dart
+child: Column(
+  children: [
+    for (var i = 0; i < countVertical; i++)
+      Row(
+        children: [
+          for (var j = 0; j < countHorizontal; j++)
+            GestureDetector(
+              onTap: () {
+                if (!(state.cellStateMap[i][j] ==
+                    CellState.blank)) {
+                  if (Timeline.now - tapBefore < 300000) {
+                    context
+                        .read<MineBloc>()
+                        .add(OpenCellEvent(j, i));
+                  } else {
+                    tapBefore = Timeline.now;
+                    context
+                        .read<MineBloc>()
+                        .add(TapCellEvent(j, i));
+                  }
+                } else {
+                  context
+                      .read<MineBloc>()
+                      .add(CloseControlEvent());
+                }
+              },
+              behavior: HitTestBehavior.translucent,
+              child: _drawCell(
+                state.cellStateMap[i][j],
+                state.mineBoard[i][j],
+                Point(j, i),
+                state.controlStatus != ControlStatus.none &&
+                    state.controlX == j &&
+                    state.controlY == i,
+              ),
+            ),
+        ],
+      ),
+  ],
+),
+
+```
+
+the several color variations are a pain in the ass, all implemented in dirty `if - else` statements
+
+```dart
+Widget? _drawCell(CellState cellState, int cellValue, Point cell, bool controlOpen) {
+if (cellState == CellState.closed) {
+  return Container(
+    width: cellSize,
+    height: cellSize,
+    decoration: BoxDecoration(
+      color: (cell.x + cell.y) % 2 == 0
+          ? Colors.blueGrey[100]
+          : Colors.blueGrey[200],
+      border: _setBorder(controlOpen),
+    ),
+  );
+} else if (cellState == CellState.flag) {
+...
+```
+
+---
+
+at the top of the stack there are the controls...
+
+### Controls
