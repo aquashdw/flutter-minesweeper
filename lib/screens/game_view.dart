@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minesweeper/service/mine_bloc.dart';
+import 'package:minesweeper/widgets/dialog_manager.dart';
 import 'package:minesweeper/widgets/mine_board.dart';
 
 class GameView extends StatelessWidget {
@@ -63,30 +64,35 @@ class GameView extends StatelessWidget {
             ),
             backgroundColor: Colors.blueAccent,
           ),
-          body: Container(
-            color: Colors.lightBlue,
-            child: SafeArea(
-              child: Center(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    var sizeFromWidth = constraints.maxHeight * 0.9 / sizeY;
-                    var sizeFromHeight = constraints.maxWidth * 0.9 / sizeX;
-                    var panelSize = sizeFromHeight > sizeFromWidth
-                        ? sizeFromWidth
-                        : sizeFromHeight;
-                    var padddingSize = sizeFromHeight > sizeFromWidth
-                        ? constraints.maxHeight * 0.1
-                        : constraints.maxWidth * 0.1;
-                    return MineBoard(
-                      padddingSize: padddingSize,
-                      cellSize: panelSize,
-                      countHorizontal: sizeX,
-                      countVertical: sizeY,
-                    );
-                  },
+          body: Stack(
+            children: [
+              const DialogManager(),
+              Container(
+                color: Colors.lightBlue,
+                child: SafeArea(
+                  child: Center(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        var sizeFromWidth = constraints.maxHeight * 0.9 / sizeY;
+                        var sizeFromHeight = constraints.maxWidth * 0.9 / sizeX;
+                        var panelSize = sizeFromHeight > sizeFromWidth
+                            ? sizeFromWidth
+                            : sizeFromHeight;
+                        var padddingSize = sizeFromHeight > sizeFromWidth
+                            ? constraints.maxHeight * 0.1
+                            : constraints.maxWidth * 0.1;
+                        return MineBoard(
+                          padddingSize: padddingSize,
+                          cellSize: panelSize,
+                          countHorizontal: sizeX,
+                          countVertical: sizeY,
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
         );
       }),
