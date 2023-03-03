@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:minesweeper/service/mine_bloc.dart';
 
 class WinDialog extends StatelessWidget {
   const WinDialog({super.key});
@@ -13,22 +11,51 @@ class WinDialog extends StatelessWidget {
         child: Container(
           height: 250,
           width: 250,
-          color: Colors.white,
+          color: Colors.lightBlue,
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("You Win!"),
-              GestureDetector(
-                onTap: () {
-                  context.read<MineBloc>().add(CloseControlEvent());
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(),
+              const Expanded(
+                child: Center(
+                  child: Text(
+                    "You Win!",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                  child: const Text("Close"),
                 ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(),
+                      ),
+                      width: 230,
+                      height: 50,
+                      child: const Center(
+                        child: Text(
+                          "Close",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
               ),
             ],
           ),
