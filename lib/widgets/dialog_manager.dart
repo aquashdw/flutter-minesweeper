@@ -21,17 +21,18 @@ class DialogManager extends StatelessWidget {
                 child: const WinDialog(),
               );
             },
-          );
+          ).then((value) => Navigator.pop(context));
         }
         if (state.status == GameStatus.lose) {
           showDialog(
-              context: context,
-              builder: (context) {
-                return BlocProvider<MineBloc>.value(
-                  value: mineBloc,
-                  child: const LoseDialog(),
-                );
-              });
+            context: context,
+            builder: (context) {
+              return BlocProvider<MineBloc>.value(
+                value: mineBloc,
+                child: const LoseDialog(),
+              );
+            },
+          ).then((value) => Navigator.pop(context));
         }
       }),
       child: Container(),

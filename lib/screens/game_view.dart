@@ -26,6 +26,8 @@ class GameView extends StatelessWidget {
       child: BlocBuilder<MineBloc, MineState>(builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
+            automaticallyImplyLeading: false,
+            backgroundColor: Colors.blueAccent,
             title: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -62,7 +64,6 @@ class GameView extends StatelessWidget {
                 ),
               ],
             ),
-            backgroundColor: Colors.blueAccent,
           ),
           body: Stack(
             children: [
