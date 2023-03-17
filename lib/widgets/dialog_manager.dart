@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minesweeper/service/mine_bloc.dart';
+import 'package:minesweeper/service/mine_state.dart';
 import 'package:minesweeper/widgets/dialogs/win_dialog.dart';
 import 'package:minesweeper/widgets/dialogs/lose_dialog.dart';
 

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minesweeper/service/mine_bloc.dart';
+import 'package:minesweeper/service/mine_event.dart';
+import 'package:minesweeper/service/mine_state.dart';
 
 // where the target cell will be positioned
 enum ControlPosition { topLeft, topRight, botLeft, botRight }
