@@ -34,31 +34,26 @@ class MineBloc extends Bloc<MineEvent, MineState> {
   MineBloc(MineState mineState) : super(mineState) {
     on<TapCellEvent>((event, emit) {
       if (state.status == GameStatus.playing) {
-        print("TapCellEvent: ${event.x}, ${event.y}");
         emit(state.openControl(event.x, event.y));
       }
     });
     on<ToggleFlagEvent>((event, emit) {
       if (state.status == GameStatus.playing) {
-        print("ToggleFlagEvent: ${event.x}, ${event.y}");
         emit(state.flagCell(event.x, event.y));
       }
     });
     on<OpenCellMulitEvent>((event, emit) {
       if (state.status == GameStatus.playing) {
-        print("OpenCellMulitEvent: ${event.x}, ${event.y}");
         emit(state.openCellMulti(event.x, event.y));
       }
     });
     on<OpenCellEvent>((event, emit) {
       if (state.status == GameStatus.playing) {
-        print("OpenCellEvent: ${event.x}, ${event.y}");
         emit(state.openCell(event.x, event.y));
       }
     });
     on<CloseControlEvent>((event, emit) {
       if (state.status == GameStatus.playing) {
-        print("CloseControlEvent");
         emit(state.closeControl());
       }
     });
@@ -81,6 +76,7 @@ class MineState {
   final int controlX;
   final int controlY;
   final int startTime;
+  final Point lastHit;
   GameStatus status;
 
   MineState({
@@ -93,6 +89,7 @@ class MineState {
     this.controlStatus = ControlStatus.none,
     this.controlX = 0,
     this.controlY = 0,
+    this.lastHit = const Point(-1, -1),
     this.status = GameStatus.playing,
   });
 
@@ -112,6 +109,7 @@ class MineState {
       controlStatus: controlStatus ?? this.controlStatus,
       controlX: controlX ?? this.controlX,
       controlY: controlY ?? this.controlY,
+      lastHit: Point(controlX ?? -1, controlY ?? -1),
       status: status ?? this.status,
     );
   }
