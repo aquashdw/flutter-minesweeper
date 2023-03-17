@@ -6,8 +6,6 @@ Minesweeper is a puzzle game loved by many, basic playing is similar to the game
 
 ## TODO
 
-- lose
-- win
 - new game with levels
 - pause
 
@@ -398,18 +396,18 @@ the several color variations are a pain in the ass, all implemented in dirty `if
 
 ```dart
 Widget? _drawCell(CellState cellState, int cellValue, Point cell, bool controlOpen) {
-if (cellState == CellState.closed) {
-  return Container(
-    width: cellSize,
-    height: cellSize,
-    decoration: BoxDecoration(
-      color: (cell.x + cell.y) % 2 == 0
-          ? Colors.blueGrey[100]
-          : Colors.blueGrey[200],
-      border: _setBorder(controlOpen),
-    ),
-  );
-} else if (cellState == CellState.flag) {
+  if (cellState == CellState.closed) {
+    return Container(
+      width: cellSize,
+      height: cellSize,
+      decoration: BoxDecoration(
+        color: (cell.x + cell.y) % 2 == 0
+            ? Colors.blueGrey[100]
+            : Colors.blueGrey[200],
+        border: _setBorder(controlOpen),
+      ),
+    );
+  } else if (cellState == CellState.flag) {
 ...
 ```
 

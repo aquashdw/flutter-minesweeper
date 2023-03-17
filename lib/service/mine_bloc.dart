@@ -33,19 +33,34 @@ class TapCellEvent extends CellEvent {
 class MineBloc extends Bloc<MineEvent, MineState> {
   MineBloc(MineState mineState) : super(mineState) {
     on<TapCellEvent>((event, emit) {
-      emit(state.openControl(event.x, event.y));
+      if (state.status == GameStatus.playing) {
+        print("TapCellEvent: ${event.x}, ${event.y}");
+        emit(state.openControl(event.x, event.y));
+      }
     });
     on<ToggleFlagEvent>((event, emit) {
-      emit(state.flagCell(event.x, event.y));
+      if (state.status == GameStatus.playing) {
+        print("ToggleFlagEvent: ${event.x}, ${event.y}");
+        emit(state.flagCell(event.x, event.y));
+      }
     });
     on<OpenCellMulitEvent>((event, emit) {
-      emit(state.openCellMulti(event.x, event.y));
+      if (state.status == GameStatus.playing) {
+        print("OpenCellMulitEvent: ${event.x}, ${event.y}");
+        emit(state.openCellMulti(event.x, event.y));
+      }
     });
     on<OpenCellEvent>((event, emit) {
-      emit(state.openCell(event.x, event.y));
+      if (state.status == GameStatus.playing) {
+        print("OpenCellEvent: ${event.x}, ${event.y}");
+        emit(state.openCell(event.x, event.y));
+      }
     });
     on<CloseControlEvent>((event, emit) {
-      emit(state.closeControl());
+      if (state.status == GameStatus.playing) {
+        print("CloseControlEvent");
+        emit(state.closeControl());
+      }
     });
   }
 }
@@ -179,7 +194,7 @@ class MineState {
   MineState openCell(int targetX, int targetY) {
     // is mine
     if (mineBoard[targetY][targetX] == 9) {
-      // TODO lose
+      status = GameStatus.lose;
       cellStateMap[targetY][targetX] = CellState.mine;
     }
     // mine in range
@@ -226,6 +241,7 @@ class MineState {
       }
     }
 
+    checkWin();
     return copyWith(controlStatus: ControlStatus.none);
   }
 
@@ -265,6 +281,7 @@ class MineState {
       // TODO lose
       for (var mine in mines) {
         cellStateMap[mine.y][mine.x] = CellState.mine;
+        status = GameStatus.lose;
       }
     }
     // if no mines
@@ -277,7 +294,21 @@ class MineState {
       }
     }
 
+    checkWin();
     return copyWith(controlStatus: ControlStatus.none);
+  }
+
+  void checkWin() {
+    var count = 0;
+    for (var row in cellStateMap) {
+      for (var cell in row) {
+        if (cell == CellState.closed || cell == CellState.flag) count += 1;
+      }
+    }
+
+    if (count == mineCount && status != GameStatus.lose) {
+      status = GameStatus.win;
+    }
   }
 }
 

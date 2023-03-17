@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class WinDialog extends StatelessWidget {
-  const WinDialog({super.key});
+class LoseDialog extends StatelessWidget {
+  const LoseDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,7 @@ class WinDialog extends StatelessWidget {
               const Expanded(
                 child: Center(
                   child: Text(
-                    "You Win!",
+                    "You Lose!",
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
@@ -36,6 +36,7 @@ class WinDialog extends StatelessWidget {
                     },
                     child: Container(
                       decoration: BoxDecoration(
+                        color: Colors.lightBlueAccent,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(),
                       ),
@@ -63,4 +64,5 @@ class WinDialog extends StatelessWidget {
       ),
     );
   }
+
 }
