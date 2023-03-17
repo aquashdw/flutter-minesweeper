@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minesweeper/service/mine_bloc.dart';
 import 'package:minesweeper/service/mine_event.dart';
-import 'package:minesweeper/service/mine_state.dart';
 import 'package:minesweeper/widgets/controls.dart';
 
 class MineBoard extends StatelessWidget {
@@ -24,90 +23,86 @@ class MineBoard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MineBloc, MineState>(
-      builder: (context, state) {
-        var controlPadding = (65 - cellSize > 0 ? 65 - cellSize : 0).toDouble();
-        var tapBefore = Timeline.now;
-        var controlPosition = _controlPosition(
-          state.controlX,
-          state.controlY,
-          countHorizontal,
-          countVertical,
-        );
+    var state = context.read<MineBloc>().state;
+    var controlPadding = (65 - cellSize > 0 ? 65 - cellSize : 0).toDouble();
+    var tapBefore = Timeline.now;
+    var controlPosition = _controlPosition(
+      state.controlX,
+      state.controlY,
+      countHorizontal,
+      countVertical,
+    );
 
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            SizedBox(
-              width: cellSize * countHorizontal + controlPadding,
-              height: cellSize * countVertical + controlPadding,
-              child: Center(
-                child: SizedBox(
-                  width: cellSize * countHorizontal,
-                  height: cellSize * countVertical,
-                  child: Column(
-                    children: [
-                      for (var i = 0; i < countVertical; i++)
-                        Row(
-                          children: [
-                            for (var j = 0; j < countHorizontal; j++)
-                              GestureDetector(
-                                onTap: () {
-                                  if (!(state.cellStateMap[i][j] ==
-                                      CellState.blank)) {
-                                    if (
-                                      Timeline.now - tapBefore < 300000 && state.lastHit == Point(j, i)
-                                      ) {
-                                      context
-                                          .read<MineBloc>()
-                                          .add(OpenCellEvent(j, i));
-                                    } else {
-                                      tapBefore = Timeline.now;
-                                      context
-                                          .read<MineBloc>()
-                                          .add(TapCellEvent(j, i));
-                                    }
-                                  } else {
-                                    context
-                                        .read<MineBloc>()
-                                        .add(CloseControlEvent());
-                                  }
-                                },
-                                behavior: HitTestBehavior.translucent,
-                                child: _drawCell(
-                                  state.cellStateMap[i][j],
-                                  state.mineBoard[i][j],
-                                  Point(j, i),
-                                  state.controlStatus != ControlStatus.none &&
-                                      state.controlX == j &&
-                                      state.controlY == i,
-                                ),
-                              ),
-                          ],
-                        ),
-                    ],
-                  ),
-                ),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        SizedBox(
+          width: cellSize * countHorizontal + controlPadding,
+          height: cellSize * countVertical + controlPadding,
+          child: Center(
+            child: SizedBox(
+              width: cellSize * countHorizontal,
+              height: cellSize * countVertical,
+              child: Column(
+                children: [
+                  for (var i = 0; i < countVertical; i++)
+                    Row(
+                      children: [
+                        for (var j = 0; j < countHorizontal; j++)
+                          GestureDetector(
+                            onTap: () {
+                              if (!(state.cellStateMap[i][j] ==
+                                  CellState.blank)) {
+                                if (Timeline.now - tapBefore < 300000 &&
+                                    state.lastHit == Point(j, i)) {
+                                  context
+                                      .read<MineBloc>()
+                                      .add(OpenCellEvent(j, i));
+                                } else {
+                                  tapBefore = Timeline.now;
+                                  context
+                                      .read<MineBloc>()
+                                      .add(TapCellEvent(j, i));
+                                }
+                              } else {
+                                context
+                                    .read<MineBloc>()
+                                    .add(CloseControlEvent());
+                              }
+                            },
+                            behavior: HitTestBehavior.translucent,
+                            child: _drawCell(
+                              state.cellStateMap[i][j],
+                              state.mineBoard[i][j],
+                              Point(j, i),
+                              state.controlStatus != ControlStatus.none &&
+                                  state.controlX == j &&
+                                  state.controlY == i,
+                            ),
+                          ),
+                      ],
+                    ),
+                ],
               ),
             ),
-            state.controlStatus != ControlStatus.none
-                ? Positioned(
-                    top: state.controlY * cellSize +
-                        _controlOffsetY(state.controlY, controlPosition,
-                            cellSize, controlPadding),
-                    left: state.controlX * cellSize +
-                        _controlOffsetX(state.controlX, controlPosition,
-                            cellSize, controlPadding),
-                    child: Controls(
-                      position: controlPosition,
-                      controlStatus: state.controlStatus,
-                      cellSize: cellSize,
-                    ),
-                  )
-                : const SizedBox(),
-          ],
-        );
-      },
+          ),
+        ),
+        state.controlStatus != ControlStatus.none
+            ? Positioned(
+                top: state.controlY * cellSize +
+                    _controlOffsetY(state.controlY, controlPosition, cellSize,
+                        controlPadding),
+                left: state.controlX * cellSize +
+                    _controlOffsetX(state.controlX, controlPosition, cellSize,
+                        controlPadding),
+                child: Controls(
+                  position: controlPosition,
+                  controlStatus: state.controlStatus,
+                  cellSize: cellSize,
+                ),
+              )
+            : const SizedBox(),
+      ],
     );
   }
 

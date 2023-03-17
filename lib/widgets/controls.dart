@@ -39,14 +39,10 @@ class Controls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MineBloc, MineState>(
-      builder: (context, state) {
-        return Column(
-          children: reverseColOn.contains(position)
-              ? columnChildren(context, state).reversed.toList()
-              : columnChildren(context, state),
-        );
-      },
+    return Column(
+      children: reverseColOn.contains(position)
+          ? columnChildren(context, context.read<MineBloc>().state).reversed.toList()
+          : columnChildren(context, context.read<MineBloc>().state),
     );
   }
 
