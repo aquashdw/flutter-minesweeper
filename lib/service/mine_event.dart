@@ -24,3 +24,11 @@ class OpenCellMulitEvent extends CellEvent {
 class TapCellEvent extends CellEvent {
   TapCellEvent(super.x, super.y);
 }
+
+class GameStartEvent extends MineEvent { 
+  GameStartEvent();
+}
+
+class TimerTickEvent extends MineEvent {
+  TimerTickEvent();
+}

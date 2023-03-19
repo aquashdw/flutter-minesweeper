@@ -12,6 +12,7 @@ class MineState {
   final int controlX;
   final int controlY;
   final int startTime;
+  final int elapsedTime;
   final Point lastHit;
   GameStatus status;
 
@@ -22,17 +23,19 @@ class MineState {
     required this.sizeX,
     required this.sizeY,
     required this.startTime,
+    this.elapsedTime = 0,
     this.controlStatus = ControlStatus.none,
     this.controlX = 0,
     this.controlY = 0,
     this.lastHit = const Point(-1, -1),
-    this.status = GameStatus.playing,
+    this.status = GameStatus.standby,
   });
 
   MineState copyWith({
     ControlStatus? controlStatus,
     int? controlX,
     int? controlY,
+    int? elapsedTime,
     GameStatus? status,
   }) {
     return MineState(
@@ -42,6 +45,7 @@ class MineState {
       sizeX: sizeX,
       sizeY: sizeY,
       startTime: startTime,
+      elapsedTime: elapsedTime ?? this.elapsedTime,
       controlStatus: controlStatus ?? this.controlStatus,
       controlX: controlX ?? this.controlX,
       controlY: controlY ?? this.controlY,
@@ -212,7 +216,6 @@ class MineState {
 
     // if any mines...
     if (mines.isNotEmpty) {
-      // TODO lose
       for (var mine in mines) {
         cellStateMap[mine.y][mine.x] = CellState.mine;
         status = GameStatus.lose;
@@ -243,5 +246,17 @@ class MineState {
     if (count == mineCount && status != GameStatus.lose) {
       status = GameStatus.win;
     }
+  }
+
+  MineState tick() {
+    return copyWith(elapsedTime: elapsedTime + 1);
+  }
+}
+
+class TimerTicker {
+  const TimerTicker();
+
+  Stream<void> tick() {
+    return Stream.periodic(const Duration(seconds: 1));
   }
 }

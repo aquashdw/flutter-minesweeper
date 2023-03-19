@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:math';
 
@@ -6,11 +7,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'mine_event.dart';
 import 'mine_state.dart';
 
-
 class MineBloc extends Bloc<MineEvent, MineState> {
-  MineBloc(MineState mineState) : super(mineState) {
+  MineBloc({required MineState mineState})
+      : _ticker = const TimerTicker(),
+        super(mineState) {
+    on<GameStartEvent>((event, emit) {
+      _tickerSubscription?.cancel();
+      _tickerSubscription =
+          _ticker.tick().listen((event) => add(TimerTickEvent()));
+    });
     on<TapCellEvent>((event, emit) {
-      if (state.status == GameStatus.playing) {
+      const openOnStatus = [GameStatus.playing, GameStatus.standby];
+      if (openOnStatus.contains(state.status)) {
         emit(state.openControl(event.x, event.y));
       }
     });
@@ -25,6 +33,10 @@ class MineBloc extends Bloc<MineEvent, MineState> {
       }
     });
     on<OpenCellEvent>((event, emit) {
+      if (state.status == GameStatus.standby) {
+        add(GameStartEvent());
+        state.status = GameStatus.playing;
+      }
       if (state.status == GameStatus.playing) {
         emit(state.openCell(event.x, event.y));
       }
@@ -34,10 +46,24 @@ class MineBloc extends Bloc<MineEvent, MineState> {
         emit(state.closeControl());
       }
     });
+    on<TimerTickEvent>((event, emit) {
+      if (state.status == GameStatus.playing) {
+        emit(state.tick());
+      }
+    });
+  }
+
+  final TimerTicker _ticker;
+  StreamSubscription<void>? _tickerSubscription;
+
+  @override
+  Future<void> close() {
+    _tickerSubscription?.cancel();
+    return super.close();
   }
 }
 
-enum GameStatus { playing, win, lose }
+enum GameStatus { standby, playing, paused, win, lose }
 
 enum CellState { closed, number, blank, flag, mine, flagWrong }
 
@@ -57,7 +83,7 @@ MineBloc newGame(int sizeX, int sizeY, int mineCount) {
     sizeY: sizeY,
     startTime: Timeline.now,
   );
-  return MineBloc(mineState);
+  return MineBloc(mineState: mineState);
 }
 
 bool checkBounds(int targetX, int targetY, int sizeX, int sizeY) {

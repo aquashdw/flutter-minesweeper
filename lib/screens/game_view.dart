@@ -52,16 +52,19 @@ class GameView extends StatelessWidget {
                   ),
                   Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(
+                    children: [
+                      const Icon(
                         Icons.alarm,
                         color: Colors.amber,
                         size: 30,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 5,
                       ),
-                      _TimeDisplay(),
+                      // _TimeDisplay(),
+                      Text(
+                        "${state.elapsedTime}",
+                      ),
                     ],
                   ),
                 ],
