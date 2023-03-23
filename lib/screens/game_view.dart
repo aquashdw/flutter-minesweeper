@@ -102,6 +102,16 @@ class GameView extends StatelessWidget {
                 ),
               ],
             ),
+            floatingActionButton:
+                {GameStatus.lose, GameStatus.win}.contains(state.status)
+                    ? FloatingActionButton(
+                        backgroundColor: Colors.lightBlueAccent,
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Icon(Icons.close),
+                      )
+                    : null,
           );
         },
       ),

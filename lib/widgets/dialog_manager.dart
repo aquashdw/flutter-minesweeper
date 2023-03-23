@@ -22,7 +22,7 @@ class DialogManager extends StatelessWidget {
                 child: const WinDialog(),
               );
             },
-          ).then((value) => Navigator.pop(context));
+          );
         }
         if (state.status == GameStatus.lose) {
           showDialog(
@@ -33,7 +33,7 @@ class DialogManager extends StatelessWidget {
                 child: const LoseDialog(),
               );
             },
-          ).then((value) => Navigator.pop(context));
+          );
         }
       }),
       child: Container(),
