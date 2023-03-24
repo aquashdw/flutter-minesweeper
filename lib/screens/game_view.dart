@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minesweeper/service/mine_bloc.dart';
+import 'package:minesweeper/service/mine_event.dart';
 import 'package:minesweeper/service/mine_state.dart';
 import 'package:minesweeper/widgets/dialog_manager.dart';
 import 'package:minesweeper/widgets/mine_board.dart';
@@ -28,8 +29,20 @@ class GameView extends StatelessWidget {
         builder: (context, state) {
           return Scaffold(
             appBar: AppBar(
+              leading: IconButton(
+                onPressed: () =>
+                    context.read<MineBloc>().add(GameTryQuitEvent()),
+                icon: const Icon(Icons.close),
+              ),
               automaticallyImplyLeading: false,
               backgroundColor: Colors.blueAccent,
+              actions: [
+                IconButton(
+                  onPressed: () =>
+                      context.read<MineBloc>().add(GamePausePressEvent()),
+                  icon: const Icon(Icons.pause),
+                )
+              ],
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -102,16 +115,6 @@ class GameView extends StatelessWidget {
                 ),
               ],
             ),
-            floatingActionButton:
-                {GameStatus.lose, GameStatus.win}.contains(state.status)
-                    ? FloatingActionButton(
-                        backgroundColor: Colors.lightBlueAccent,
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Icon(Icons.close),
-                      )
-                    : null,
           );
         },
       ),

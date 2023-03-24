@@ -25,8 +25,20 @@ class TapCellEvent extends CellEvent {
   TapCellEvent(super.x, super.y);
 }
 
-class GameStartEvent extends MineEvent { 
+class GameStartEvent extends MineEvent {
   GameStartEvent();
+}
+
+class GamePausePressEvent extends MineEvent {
+  GamePausePressEvent();
+}
+
+class GameTryQuitEvent extends MineEvent {
+  GameTryQuitEvent();
+}
+
+class GameCancelQuitEvent extends MineEvent {
+  GameCancelQuitEvent();
 }
 
 class TimerTickEvent extends MineEvent {

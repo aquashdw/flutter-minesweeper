@@ -1,7 +1,5 @@
 import 'dart:math';
 
-import 'mine_bloc.dart';
-
 class MineState {
   final List<List<int>> mineBoard;
   final List<List<CellState>> cellStateMap;
@@ -251,7 +249,26 @@ class MineState {
   MineState tick() {
     return copyWith(elapsedTime: elapsedTime + 1);
   }
+
+  void tryQuit() {
+    status = GameStatus.tryQuit;
+  }
+
+  void cancelQuit() {
+    status = GameStatus.playing;
+  }
+
+  void togglePause() {
+    status =
+        status == GameStatus.paused ? GameStatus.playing : GameStatus.paused;
+  }
 }
+
+enum GameStatus { standby, playing, paused, win, lose, tryQuit }
+
+enum CellState { closed, number, blank, flag, mine, flagWrong }
+
+enum ControlStatus { none, all, shovel, flag }
 
 class TimerTicker {
   const TimerTicker();

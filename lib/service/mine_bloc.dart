@@ -51,6 +51,21 @@ class MineBloc extends Bloc<MineEvent, MineState> {
         emit(state.tick());
       }
     });
+    on<GameTryQuitEvent>((event, emit) {
+      state.tryQuit();
+      emit(state.copyWith());
+    });
+    on<GameCancelQuitEvent>((event, emit) {
+      state.cancelQuit();
+      emit(state.copyWith());
+    });
+    on<GamePausePressEvent>((event, emit) {
+      const targetStatus = [GameStatus.playing, GameStatus.paused];
+      if (targetStatus.contains(state.status)) {
+        state.togglePause();
+        emit(state.copyWith());
+      }
+    });
   }
 
   final TimerTicker _ticker;
@@ -62,12 +77,6 @@ class MineBloc extends Bloc<MineEvent, MineState> {
     return super.close();
   }
 }
-
-enum GameStatus { standby, playing, paused, win, lose }
-
-enum CellState { closed, number, blank, flag, mine, flagWrong }
-
-enum ControlStatus { none, all, shovel, flag }
 
 MineBloc newGame(int sizeX, int sizeY, int mineCount) {
   final cellState = [
