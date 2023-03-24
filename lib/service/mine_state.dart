@@ -30,14 +30,6 @@ class MineState {
   });
 
   MineState copy() {
-    return copyWith();
-  }
-
-  MineState copyWith({
-    ControlStatus? controlStatus,
-    int? elapsedTime,
-    GameStatus? status,
-  }) {
     return MineState(
       mineBoard: mineBoard,
       cellStateMap: cellStateMap,
@@ -45,12 +37,12 @@ class MineState {
       sizeX: sizeX,
       sizeY: sizeY,
       startTime: startTime,
-      elapsedTime: elapsedTime ?? this.elapsedTime,
-      controlStatus: controlStatus ?? this.controlStatus,
+      elapsedTime: elapsedTime,
+      controlStatus: controlStatus,
       controlX: controlX,
       controlY: controlY,
       lastHit: Point(controlX, controlY),
-      status: status ?? this.status,
+      status: status,
     );
   }
 
@@ -165,8 +157,8 @@ class MineState {
       }
     }
 
-    checkWin();
-    checkLose();
+    _checkWin();
+    _checkLose();
     closeControl();
   }
 
@@ -218,12 +210,12 @@ class MineState {
       }
     }
 
-    checkWin();
-    checkLose();
+    _checkWin();
+    _checkLose();
     closeControl();
   }
 
-  void checkWin() {
+  void _checkWin() {
     var count = 0;
     for (var row in cellStateMap) {
       for (var cell in row) {
@@ -236,7 +228,7 @@ class MineState {
     }
   }
 
-  void checkLose() {
+  void _checkLose() {
     if (status == GameStatus.lose) {
       for (var i = 0; i < sizeY; i++) {
         for (var j = 0; j < sizeX; j++) {
