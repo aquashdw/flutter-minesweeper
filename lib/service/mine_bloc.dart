@@ -19,17 +19,24 @@ class MineBloc extends Bloc<MineEvent, MineState> {
     on<TapCellEvent>((event, emit) {
       const openOnStatus = [GameStatus.playing, GameStatus.standby];
       if (openOnStatus.contains(state.status)) {
-        emit(state.openControl(event.x, event.y));
+        state.openControl(event.x, event.y);
+        emit(state.copy());
       }
     });
     on<ToggleFlagEvent>((event, emit) {
+      if (state.status == GameStatus.standby) {
+        add(GameStartEvent());
+        state.status = GameStatus.playing;
+      }
       if (state.status == GameStatus.playing) {
-        emit(state.flagCell(event.x, event.y));
+        state.flagCell(event.x, event.y);
+        emit(state.copy());
       }
     });
     on<OpenCellMulitEvent>((event, emit) {
       if (state.status == GameStatus.playing) {
-        emit(state.openCellMulti(event.x, event.y));
+        state.openCellMulti(event.x, event.y);
+        emit(state.copy());
       }
     });
     on<OpenCellEvent>((event, emit) {
@@ -38,32 +45,35 @@ class MineBloc extends Bloc<MineEvent, MineState> {
         state.status = GameStatus.playing;
       }
       if (state.status == GameStatus.playing) {
-        emit(state.openCell(event.x, event.y));
+        state.openCell(event.x, event.y);
+        emit(state.copy());
       }
     });
     on<CloseControlEvent>((event, emit) {
       if (state.status == GameStatus.playing) {
-        emit(state.closeControl());
+        state.closeControl();
+        emit(state.copy());
       }
     });
     on<TimerTickEvent>((event, emit) {
       if (state.status == GameStatus.playing) {
-        emit(state.tick());
+        state.tick();
+        emit(state.copy());
       }
     });
     on<GameTryQuitEvent>((event, emit) {
       state.tryQuit();
-      emit(state.copyWith());
+      emit(state.copy());
     });
     on<GameCancelQuitEvent>((event, emit) {
       state.cancelQuit();
-      emit(state.copyWith());
+      emit(state.copy());
     });
     on<GamePausePressEvent>((event, emit) {
       const targetStatus = [GameStatus.playing, GameStatus.paused];
       if (targetStatus.contains(state.status)) {
         state.togglePause();
-        emit(state.copyWith());
+        emit(state.copy());
       }
     });
   }

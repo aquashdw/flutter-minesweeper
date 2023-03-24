@@ -6,12 +6,12 @@ class MineState {
   final int mineCount;
   final int sizeX;
   final int sizeY;
-  final ControlStatus controlStatus;
-  final int controlX;
-  final int controlY;
+  ControlStatus controlStatus;
+  int controlX;
+  int controlY;
   final int startTime;
-  final int elapsedTime;
-  final Point lastHit;
+  int elapsedTime;
+  Point lastHit;
   GameStatus status;
 
   MineState({
@@ -29,10 +29,12 @@ class MineState {
     this.status = GameStatus.standby,
   });
 
+  MineState copy() {
+    return copyWith();
+  }
+
   MineState copyWith({
     ControlStatus? controlStatus,
-    int? controlX,
-    int? controlY,
     int? elapsedTime,
     GameStatus? status,
   }) {
@@ -45,28 +47,26 @@ class MineState {
       startTime: startTime,
       elapsedTime: elapsedTime ?? this.elapsedTime,
       controlStatus: controlStatus ?? this.controlStatus,
-      controlX: controlX ?? this.controlX,
-      controlY: controlY ?? this.controlY,
-      lastHit: Point(controlX ?? -1, controlY ?? -1),
+      controlX: controlX,
+      controlY: controlY,
+      lastHit: Point(controlX, controlY),
       status: status ?? this.status,
     );
   }
 
-  MineState flagCell(int x, int y) {
+  void flagCell(int x, int y) {
     var targetState = cellStateMap[y][x];
     if (targetState == CellState.closed || targetState == CellState.flag) {
       cellStateMap[y][x] =
           targetState == CellState.closed ? CellState.flag : CellState.closed;
-      return copyWith(
-        controlStatus: ControlStatus.none,
-      );
-    } else {
-      return this;
+      controlStatus = ControlStatus.none;
     }
   }
 
-  MineState openControl(int x, int y) {
-    var controlStatus = ControlStatus.all;
+  void openControl(int x, int y) {
+    lastHit = Point(x, y);
+    controlX = x;
+    controlY = y;
 
     switch (cellStateMap[y][x]) {
       case CellState.blank:
@@ -100,18 +100,6 @@ class MineState {
         controlStatus = ControlStatus.all;
         break;
     }
-
-    return copyWith(
-      controlStatus: controlStatus,
-      controlX: x,
-      controlY: y,
-    );
-  }
-
-  MineState closeControl() {
-    return copyWith(
-      controlStatus: ControlStatus.none,
-    );
   }
 
   int mineLeft() {
@@ -127,7 +115,7 @@ class MineState {
   bool checkBounds(int targetX, int targetY) =>
       !(targetX < 0 || targetX >= sizeX || targetY < 0 || targetY >= sizeY);
 
-  MineState openCell(int targetX, int targetY) {
+  void openCell(int targetX, int targetY) {
     // is mine
     if (mineBoard[targetY][targetX] == 9) {
       status = GameStatus.lose;
@@ -178,10 +166,11 @@ class MineState {
     }
 
     checkWin();
-    return copyWith(controlStatus: ControlStatus.none);
+    checkLose();
+    closeControl();
   }
 
-  MineState openCellMulti(int targetX, int targetY) {
+  void openCellMulti(int targetX, int targetY) {
     // queue for cells to open if no mines
     var checkQueue = <Point<int>>[];
     // queue for mines if mines behind surrounding cells
@@ -230,7 +219,8 @@ class MineState {
     }
 
     checkWin();
-    return copyWith(controlStatus: ControlStatus.none);
+    checkLose();
+    closeControl();
   }
 
   void checkWin() {
@@ -246,8 +236,26 @@ class MineState {
     }
   }
 
-  MineState tick() {
-    return copyWith(elapsedTime: elapsedTime + 1);
+  void checkLose() {
+    if (status == GameStatus.lose) {
+      for (var i = 0; i < sizeY; i++) {
+        for (var j = 0; j < sizeX; j++) {
+          if (cellStateMap[i][j] == CellState.closed && mineBoard[i][j] == 9) {
+            cellStateMap[i][j] = CellState.mine;
+          }
+        }
+      }
+    }
+  }
+
+  void closeControl() {
+    controlStatus = ControlStatus.none;
+    controlX = -1;
+    controlY = -1;
+  }
+
+  void tick() {
+    elapsedTime = elapsedTime + 1;
   }
 
   void tryQuit() {

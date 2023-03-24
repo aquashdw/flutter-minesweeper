@@ -55,7 +55,7 @@ class MineBoard extends StatelessWidget {
                               if (!(state.cellStateMap[i][j] ==
                                   CellState.blank)) {
                                 if (Timeline.now - tapBefore < 300000 &&
-                                    state.lastHit == Point(j, i)) {
+                                    state.controlX == j && state.controlY == i) {
                                   context
                                       .read<MineBloc>()
                                       .add(OpenCellEvent(j, i));

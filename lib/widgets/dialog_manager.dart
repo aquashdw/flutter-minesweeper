@@ -13,17 +13,13 @@ class DialogManager extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mineBloc = context.read<MineBloc>();
     return BlocListener<MineBloc, MineState>(
       listener: ((context, state) {
         if (state.status == GameStatus.win) {
           showDialog(
             context: context,
             builder: (context) {
-              return BlocProvider.value(
-                value: mineBloc,
-                child: const WinDialog(),
-              );
+              return const WinDialog();
             },
           );
         }
