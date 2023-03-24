@@ -5,11 +5,18 @@ class QuitConfirmDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var screenWidth = MediaQuery.of(context).size.width;
+    var screenHeight = MediaQuery.of(context).size.height;
+
+    var dialogHeight = screenHeight / 3.5;
+    var buttonWidth =
+        ((screenWidth - 60) ~/ 2 > 230 ? 230 : (screenWidth - 60) ~/ 2)
+            .toDouble();
     return Container(
       color: Colors.blueAccent,
       child: Center(
         child: Container(
-          height: 250,
+          height: dialogHeight,
           color: Colors.lightBlue,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -39,7 +46,7 @@ class QuitConfirmDialog extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(),
                       ),
-                      width: 230,
+                      width: buttonWidth,
                       height: 50,
                       child: const Center(
                         child: Text(
@@ -65,7 +72,7 @@ class QuitConfirmDialog extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(),
                       ),
-                      width: 230,
+                      width: buttonWidth,
                       height: 50,
                       child: const Center(
                         child: Text(

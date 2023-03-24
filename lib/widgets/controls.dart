@@ -41,7 +41,9 @@ class Controls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: reverseColOn.contains(position)
-          ? columnChildren(context, context.read<MineBloc>().state).reversed.toList()
+          ? columnChildren(context, context.read<MineBloc>().state)
+              .reversed
+              .toList()
           : columnChildren(context, context.read<MineBloc>().state),
     );
   }
@@ -99,19 +101,25 @@ class Controls extends StatelessWidget {
     return [
       GestureDetector(
         onTap: () {
-          switch (controlStatus) {
-            case ControlStatus.shovel:
-              context
-                  .read<MineBloc>()
-                  .add(OpenCellMulitEvent(state.controlX, state.controlY));
-              break;
-            case ControlStatus.all:
-              context
-                  .read<MineBloc>()
-                  .add(OpenCellEvent(state.controlX, state.controlY));
-              break;
-            default:
-              break;
+          if (state.status == GameStatus.standby) {
+            context
+                .read<MineBloc>()
+                .add(OpenCellEvent(state.controlX, state.controlY));
+          } else {
+            switch (controlStatus) {
+              case ControlStatus.shovel:
+                context
+                    .read<MineBloc>()
+                    .add(OpenCellMulitEvent(state.controlX, state.controlY));
+                break;
+              case ControlStatus.all:
+                context
+                    .read<MineBloc>()
+                    .add(OpenCellEvent(state.controlX, state.controlY));
+                break;
+              default:
+                break;
+            }
           }
         },
         child: showShovelOn.contains(controlStatus)
