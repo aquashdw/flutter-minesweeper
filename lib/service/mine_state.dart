@@ -65,7 +65,9 @@ class MineState {
         controlStatus = ControlStatus.none;
         break;
       case CellState.closed:
-        controlStatus = ControlStatus.all;
+        status == GameStatus.standby
+            ? controlStatus = ControlStatus.shovel
+            : controlStatus = ControlStatus.all;
         break;
       case CellState.flag:
         controlStatus = ControlStatus.flag;
@@ -213,6 +215,60 @@ class MineState {
     _checkWin();
     _checkLose();
     closeControl();
+  }
+
+  // set initial opening cell as blank cell
+  void initBoard(int openX, int openY) {
+    var mineGen = Random();
+    var minePositions = [];
+    var invalidPositions = [];
+
+    // set points that cannot be mines
+    // to be a blank cell, surroundings must also not be mines
+    for (var dx = -1; dx < 2; dx++) {
+      for (var dy = -1; dy < 2; dy++) {
+        var checkX = openX + dx;
+        var checkY = openY + dy;
+        if (checkBounds(checkX, checkY)) {
+          invalidPositions.add(Point(checkX, checkY));
+        }
+      }
+    }
+
+    // convert int to Point
+    Point toPoint(int minePositionInt) {
+      var mineX = minePositionInt % sizeX;
+      var mineY = minePositionInt ~/ sizeX;
+      return Point(mineX, mineY);
+    }
+
+    while (minePositions.length < mineCount) {
+      var minePositionInt = mineGen.nextInt(sizeX * sizeY);
+      var mineCandidate = toPoint(minePositionInt);
+      // not already mine
+      if (!minePositions.contains(mineCandidate) &&
+          // not invalid position
+          !invalidPositions.contains(mineCandidate)) {
+        minePositions.add(mineCandidate);
+      }
+    }
+
+    // set other numbers
+    for (var minePosition in minePositions) {
+      mineBoard[minePosition.y][minePosition.x] = 9;
+      for (var dx = -1; dx < 2; dx++) {
+        for (var dy = -1; dy < 2; dy++) {
+          var checkX = minePosition.x + dx;
+          var checkY = minePosition.y + dy;
+          if (!checkBounds(checkX, checkY)) {
+            continue;
+          }
+          if (mineBoard[checkY][checkX] != 9) {
+            mineBoard[checkY][checkX]++;
+          }
+        }
+      }
+    }
   }
 
   void _checkWin() {

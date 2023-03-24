@@ -42,6 +42,7 @@ class MineBloc extends Bloc<MineEvent, MineState> {
     on<OpenCellEvent>((event, emit) {
       if (state.status == GameStatus.standby) {
         add(GameStartEvent());
+        state.initBoard(event.x, event.y);
         state.status = GameStatus.playing;
       }
       if (state.status == GameStatus.playing) {
@@ -95,7 +96,10 @@ MineBloc newGame(int sizeX, int sizeY, int mineCount) {
   ];
 
   var mineState = MineState(
-    mineBoard: generateBoard(sizeX, sizeY, mineCount),
+    // mineBoard: generateBoard(sizeX, sizeY, mineCount),
+    mineBoard: [
+      for (var i = 0; i < sizeY; i++) [for (var j = 0; j < sizeX; j++) 0]
+    ],
     cellStateMap: cellState,
     mineCount: mineCount,
     sizeX: sizeX,
@@ -107,38 +111,4 @@ MineBloc newGame(int sizeX, int sizeY, int mineCount) {
 
 bool checkBounds(int targetX, int targetY, int sizeX, int sizeY) {
   return !(targetX < 0 || targetX >= sizeX || targetY < 0 || targetY >= sizeY);
-}
-
-List<List<int>> generateBoard(sizeX, sizeY, mineCount) {
-  var mineBoard = [
-    for (var i = 0; i < sizeY; i++) [for (var j = 0; j < sizeX; j++) 0]
-  ];
-  var mineGen = Random();
-  var minePositions = [];
-  while (minePositions.length < mineCount) {
-    var mineCandidate = mineGen.nextInt(sizeX * sizeY);
-    if (!minePositions.contains(mineCandidate)) {
-      minePositions.add(mineCandidate);
-    }
-  }
-
-  for (var minePosition in minePositions) {
-    var mineX = minePosition % sizeX;
-    var mineY = minePosition ~/ sizeX;
-    mineBoard[mineY][mineX] = 9;
-    for (var dx = -1; dx < 2; dx++) {
-      for (var dy = -1; dy < 2; dy++) {
-        var checkX = mineX + dx;
-        var checkY = mineY + dy;
-        if (!checkBounds(checkX, checkY, sizeX, sizeY)) {
-          continue;
-        }
-        if (mineBoard[checkY][checkX] != 9) {
-          mineBoard[checkY][checkX]++;
-        }
-      }
-    }
-  }
-
-  return mineBoard;
 }
