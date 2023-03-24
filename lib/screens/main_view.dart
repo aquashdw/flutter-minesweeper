@@ -51,34 +51,9 @@ class _VerticalLayout extends StatelessWidget {
       children: [
         Flexible(
           flex: 5,
-          child: Container(
-            decoration: const BoxDecoration(color: Colors.lightBlue),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "aquashdw's",
-                    style: TextStyle(
-                      fontSize: fontSize * 0.7,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  _MineIcon(mineSize: mineSize),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    "MineSweeper",
-                    style: TextStyle(
-                      fontSize: fontSize,
-                    ),
-                  )
-                ],
-              ),
-            ),
+          child: _MainBanner(
+            fontSize: fontSize,
+            mineSize: mineSize,
           ),
         ),
         Flexible(
@@ -135,34 +110,9 @@ class _HorizontalLayout extends StatelessWidget {
       children: [
         Flexible(
           flex: 5,
-          child: Container(
-            decoration: const BoxDecoration(color: Colors.lightBlue),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "aquashdw's",
-                    style: TextStyle(
-                      fontSize: fontSize * 0.7,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  _MineIcon(mineSize: mineSize),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    "MineSweeper",
-                    style: TextStyle(
-                      fontSize: fontSize,
-                    ),
-                  )
-                ],
-              ),
-            ),
+          child: _MainBanner(
+            fontSize: fontSize,
+            mineSize: mineSize,
           ),
         ),
         Flexible(
@@ -199,6 +149,49 @@ class _HorizontalLayout extends StatelessWidget {
           ),
         )
       ],
+    );
+  }
+}
+
+class _MainBanner extends StatelessWidget {
+  const _MainBanner({
+    required this.fontSize,
+    required this.mineSize,
+  });
+
+  final double fontSize;
+  final double mineSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(color: Colors.lightBlue),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "aquashdw's",
+              style: TextStyle(
+                fontSize: fontSize * 0.7,
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            _MineIcon(mineSize: mineSize),
+            const SizedBox(
+              height: 10,
+            ),
+            Text(
+              "MineSweeper",
+              style: TextStyle(
+                fontSize: fontSize,
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 }
