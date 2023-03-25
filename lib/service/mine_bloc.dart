@@ -50,7 +50,8 @@ class MineBloc extends Bloc<MineEvent, MineState> {
       }
     });
     on<CloseControlEvent>((event, emit) {
-      if (state.status == GameStatus.playing) {
+      const openOnStatus = [GameStatus.playing, GameStatus.standby];
+      if (openOnStatus.contains(state.status)) {
         state.closeControl();
         emit(state.copy());
       }
@@ -66,7 +67,7 @@ class MineBloc extends Bloc<MineEvent, MineState> {
       emit(state.copy());
     });
     on<GameCancelQuitEvent>((event, emit) {
-      state.cancelQuit();
+      state.cancelQuit(_tickerSubscription != null);
       emit(state.copy());
     });
     on<GamePausePressEvent>((event, emit) {

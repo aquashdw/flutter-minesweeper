@@ -310,8 +310,8 @@ class MineState {
     status = GameStatus.tryQuit;
   }
 
-  void cancelQuit() {
-    status = GameStatus.playing;
+  void cancelQuit(bool started) {
+    status = started ? GameStatus.playing : GameStatus.standby;
   }
 
   void togglePause() {
