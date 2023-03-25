@@ -6,8 +6,7 @@ Minesweeper is a puzzle game loved by many, basic playing is similar to the game
 
 ## TODO
 
-- new game with levels
-- pause
+- write better readme
 
 ## Minesweeper Logic
 

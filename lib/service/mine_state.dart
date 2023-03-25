@@ -51,7 +51,7 @@ class MineState {
     if (targetState == CellState.closed || targetState == CellState.flag) {
       cellStateMap[y][x] =
           targetState == CellState.closed ? CellState.flag : CellState.closed;
-      controlStatus = ControlStatus.none;
+      closeControl();
     }
   }
 

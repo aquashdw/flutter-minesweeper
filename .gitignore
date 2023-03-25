@@ -324,8 +324,4 @@ hs_err_pid*
 
 !/gradle/wrapper/gradle-wrapper.jar
 
-<<<<<<< HEAD
 # End of https://www.toptal.com/developers/gitignore/api/flutter,dart,visualstudiocode,intellij+all,androidstudio
-=======
-# End of https://www.toptal.com/developers/gitignore/api/flutter,dart,visualstudiocode,intellij+all,androidstudio
->>>>>>> a1266f4 (init)
